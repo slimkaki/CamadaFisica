@@ -61,7 +61,7 @@ def main():
 
     # espera o fim da transmissão
     while(com.tx.getIsBussy()):
-       pass
+      pass
     
     size = com.rx.getNData(3)
 

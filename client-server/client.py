@@ -19,7 +19,7 @@ import time
 #   python -m serial.tools.list_ports
 
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/cu.usbmodem142101" # Mac    (variacao de)
+serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
 # serialName = "COM11"                  # Windows(variacao de)
 print("abriu com")
 
@@ -50,16 +50,22 @@ def main():
     
     #exemplo2
     #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
-    with open("fiadaputa.jpg", "rb")  as aa:
-      txBuffer0 = aa.read()
+    txBuffer= open("cavalo.jpeg", "rb").read()
+    #   txBuffer0 = aa.read()
+    #   f = bytearray(txBuffer0)
+
+    print("TxBuffer sem converter para int...........{}".format(txBuffer))
     
     
-    txLen    = len(txBuffer0)
+    txLen    = len(txBuffer)
     print(txLen)
 
-    imgSize = txLen.to_bytes(4, byteorder = "big")
+    imgSize = txLen.to_bytes(4, byteorder = "little")
 
-    bufferCompleto = imgSize + txBuffer0
+    bufferCompleto = imgSize + txBuffer
+
+    print("Buffer completo................{}".format(bufferCompleto))
+    print("imgSize...............{}".format(imgSize))
 
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(txLen))
