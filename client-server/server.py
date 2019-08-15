@@ -60,14 +60,7 @@ def main():
     #com.sendData(txBuffer)
 
     # espera o fim da transmissão
-<<<<<<< HEAD
-    while(com.tx.getIsBussy()):
-      pass
-    
-    size = com.rx.getNData(3)
 
-    txLen = int.from_bytes(size, byteorder = "big")
-=======
     while(com.rx.getIsEmpty()):
        pass
     rxBuffer, nRx = com.getData(4)
@@ -78,7 +71,6 @@ def main():
     #print("    ")
     #print(txLen)
     #print("    ")
->>>>>>> 33d9d81722aa399a34f7666845ec20b9b9a0d9f3
     # Atualiza dados da transmissão
     #txSize = com.tx.getStatus()
     #print ("Transmitido       {} bytes ".format(txSize))
@@ -94,7 +86,7 @@ def main():
     
     print (rxBuffer)
 
-    open("uhul.jpg","wb").write(rxBuffer)
+    open("uhul.jpeg","wb").write(rxBuffer)
 
     
 
