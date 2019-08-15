@@ -20,7 +20,7 @@ import time
 
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
-serialName = "COM7"                  # Windows(variacao de)
+serialName = "COM5"                  # Windows(variacao de)
 print("abriu com")
 
 def main():
@@ -38,7 +38,7 @@ def main():
     print("-------------------------")
 
     # Carrega dados
-    print ("gerando dados para transmissao :")
+    print ("iniciando recebimento:")
   
       #no exemplo estamos gerando uma lista de bytes ou dois bytes concatenados
     
@@ -60,12 +60,16 @@ def main():
     #com.sendData(txBuffer)
 
     # espera o fim da transmissão
-    while(com.tx.getIsBussy()):
+    while(com.rx.getIsEmpty()):
        pass
-    
-    size = com.rx.getNData(3)
-
-    txLen = int.from_bytes(size, byteorder = "big")
+    rxBuffer, nRx = com.getData(4)
+    print ("Leitura do tamanho da imagem em hexa.............       {}  ".format( len(rxBuffer)))
+    tamanhoIntimagem = int.from_bytes(rxBuffer, byteorder = "little")
+    print ("Leitura do tamanho da imagem..............       {}  ".format( tamanhoIntimagem))
+    #txLen = int.from_bytes(size, byteorder = "big")
+    #print("    ")
+    #print(txLen)
+    #print("    ")
     # Atualiza dados da transmissão
     #txSize = com.tx.getStatus()
     #print ("Transmitido       {} bytes ".format(txSize))
@@ -74,12 +78,14 @@ def main():
     print ("Recebendo dados .... ")
     
     #repare que o tamanho da mensagem a ser lida é conhecida!     
-    rxBuffer, nRx = com.getData(txLen)
+    #rxBuffer, nRx = com.getData(tamanhoIntimagem)
 
     # log
     print ("Lido              {} bytes ".format(nRx))
     
     print (rxBuffer)
+
+    open("uhul.jpg","wb").write(rxBuffer)
 
     
 
