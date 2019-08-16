@@ -49,13 +49,25 @@ class Client(object):
 
     print ("Recebendo dados .... ")
 
+    while (self.com.rx.getIsEmpty()):
+      pass
+
+    rxBuffer, nRx = self.com.getData(4)
+
+    tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
+
+    print("Confirmação do tamanho da imagem....................{}".format(tamanhoConfirma))
     t1 = time.time()
 
-    vel = txLen/(t1-t0)
+    tempo = t1-t0
+
+    vel = txLen/(tempo)
 
     print("\n")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-    print("Tempo de transferência........................{}".format(t1-t0))
+    print("Tempo de transferência........................{}".format(tempo))
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    print("Velocidade da transmissão......................{} bytes/s".format(vel))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("\n")
     
