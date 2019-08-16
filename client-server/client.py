@@ -58,7 +58,7 @@ class Client(object):
     print("Tempo de transferência........................{}".format(t1-t0))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("\n")
-    s
+    
     # Encerra comunicação
     print("-------------------------")
     print("Comunicação encerrada")
