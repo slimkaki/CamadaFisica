@@ -28,7 +28,7 @@ getSerial = getSerial.decode("utf-8")
 getSerial = getSerial.split("\n")
 del getSerial[-1]
 print("Qual porta do seu computador você está utilizando?")
-for i in range(len(getSerial)):
+for i in range(0, len(getSerial)):
   print("{} - {}".format(i, getSerial[i]))
   print("\n")
 print("Digite o número da porta...\n")
