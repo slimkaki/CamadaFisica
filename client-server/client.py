@@ -18,8 +18,8 @@ import time
 #   para saber a sua porta, execute no terminal :
 #   python -m serial.tools.list_ports
 
-#serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
+serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+#serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
 # serialName = "COM11"                  # Windows(variacao de)
 print("abriu com")
 
@@ -50,7 +50,7 @@ def main():
     
     #exemplo2
     #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
-    txBuffer= open("cavalo.jpeg", "rb").read()
+    txBuffer = open("cavalinho.jpeg", "rb").read()
     #   txBuffer0 = aa.read()
     #   f = bytearray(txBuffer0)
 
@@ -71,6 +71,8 @@ def main():
     print("tentado transmitir .... {} bytes".format(txLen))
     com.sendData(bufferCompleto)
 
+    t0 = time.time()
+
     # espera o fim da transmissão
     #while(com.tx.getIsBussy()):
     #    pass
@@ -90,8 +92,33 @@ def main():
     # print ("Lido              {} bytes ".format(nRx))
     
     # print (rxBuffer)
+    print("\n")
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
+    print("Esperando receber confirmação da chegada do arquivo")
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
+    print("\n")
 
-    
+    while(com.rx.getIsEmpty()):
+        pass
+
+    rxBuffer, nRx = com.getData(4)
+
+    tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
+
+    print("Confirmação do tamanho de imagem................{}".format(tamanhoConfirma))
+
+
+    t1 = time.time()
+
+    vel = txLen/(t1-t0)
+
+    print("\n")
+    print("- - - - - - - - - - - - - - - - - - - - - -")
+    print("Tempo de transferencia.............{} s".format(t1-t0))
+    print("- - - - - - - - - - - - - - - - - - - - - -")
+    print("Velocidade de transferencia........{} bytes/s".format(vel))
+    print("- - - - - - - - - - - - - - - - - - - - - -")
+    print("\n")
 
     # Encerra comunicação
     print("-------------------------")
