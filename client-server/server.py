@@ -18,9 +18,9 @@ import time
 #   para saber a sua porta, execute no terminal :
 #   python -m serial.tools.list_ports
 
-#serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+serialName = "/dev/ttyACM1"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
-serialName = "COM5"                  # Windows(variacao de)
+#serialName = "COM5"                  # Windows(variacao de)
 print("abriu com")
 
 def main():
@@ -61,9 +61,12 @@ def main():
 
     # espera o fim da transmissão
 
-    while(com.rx.getIsEmpty()):
-       pass
-    rxBuffer, nRx = com.getData(4)
+    # while(com.rx.getIsEmpty()):
+    #    pass
+    rxBuffer, nRx = com.getData(8)
+    print("veio assim")
+    print ((rxBuffer , nRx))
+    
     print ("Leitura do tamanho da imagem em hexa.............       {}  ".format( len(rxBuffer)))
     tamanhoIntimagem = int.from_bytes(rxBuffer, byteorder = "little")
     print ("Leitura do tamanho da imagem..............       {}  ".format( tamanhoIntimagem))
@@ -84,9 +87,10 @@ def main():
     # log
     print ("Lido              {} bytes ".format(nRx))
     
-    print (rxBuffer)
+    print ((rxBuffer))
+    print('rxbuffercomprimentoacima')
 
-    open("uhul.jpeg","wb").write(rxBuffer)
+    open("xxx.png","wb").write(rxBuffer)
 
     
 

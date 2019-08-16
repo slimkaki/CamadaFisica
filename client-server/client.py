@@ -18,8 +18,8 @@ import time
 #   para saber a sua porta, execute no terminal :
 #   python -m serial.tools.list_ports
 
-#serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
+serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+#serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
 # serialName = "COM11"                  # Windows(variacao de)
 print("abriu com")
 
@@ -50,21 +50,21 @@ def main():
     
     #exemplo2
     #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
-    txBuffer= open("cavalo.jpeg", "rb").read()
+    txBuffer= open("x.png", "rb").read()
     #   txBuffer0 = aa.read()
     #   f = bytearray(txBuffer0)
 
-    print("TxBuffer sem converter para int...........{}".format(txBuffer))
+    #print("TxBuffer sem converter para int...........{}".format(txBuffer))
     
     
     txLen    = len(txBuffer)
     print(txLen)
-
-    imgSize = txLen.to_bytes(4, byteorder = "little")
+    print(txBuffer, "OEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVIN")
+    imgSize = txLen.to_bytes(8, byteorder = "little")
 
     bufferCompleto = imgSize + txBuffer
 
-    print("Buffer completo................{}".format(bufferCompleto))
+    #print("Buffer completo................{}".format(bufferCompleto))
     print("imgSize...............{}".format(imgSize))
 
     # Transmite dado
@@ -97,6 +97,8 @@ def main():
     print("-------------------------")
     print("Comunicação encerrada")
     print("-------------------------")
+    print(txBuffer, "OEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVINOEKEVIN")
+
     com.disable()
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
