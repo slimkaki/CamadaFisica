@@ -70,8 +70,8 @@ class Client(object):
 #   para saber a sua porta, execute no terminal :
 #   python -m serial.tools.list_ports
 
-#serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
+serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+#serialName = "/dev/cu.usbmodem141101" # Mac    (variacao de)
 # serialName = "COM11"                  # Windows(variacao de)
 print("abriu com")
 
@@ -99,7 +99,7 @@ print("abriu com")
 #     #for x in range(1,10):
 #     #    ListTxBuffer.append(x)
 #     #txBuffer = bytes(ListTxBuffer)
-    
+
 #     #exemplo2
 #     #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
 #     txBuffer= open("cavalo.jpeg", "rb").read()
