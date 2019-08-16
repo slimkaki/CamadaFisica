@@ -8,10 +8,62 @@
 #  Aplicação 
 ####################################################
 
-print("comecou")
-
 from enlace import *
 import time
+
+class Client(object):
+
+  def __init__(self, serialName, nomeArquivo):
+    self.serialName = serialName
+    self.nomeArquivo = nomeArquivo
+    self.com = enlace(serialName)
+
+  def comunicate(self):
+    self.com.enable()
+
+    print("-------------------------")
+    print("Comunicação inicializada")
+    print("  porta : {}".format(self.com.fisica.name))
+    print("-------------------------")
+
+    print ("gerando dados para transmissao :")
+
+    txBuffer= open(self.nomeArquivo, "rb").read()
+
+    print("TxBuffer sem converter para int...........{}".format(txBuffer))
+
+    txLen    = len(txBuffer)
+
+    imgSize = txLen.to_bytes(4, byteorder = "little")
+
+    bufferCompleto = imgSize + txBuffer
+
+    print("Buffer completo................{}".format(bufferCompleto))
+    print("imgSize...............{}".format(imgSize))
+
+    # Transmite dado
+    print("tentado transmitir .... {} bytes".format(txLen))
+    self.com.sendData(bufferCompleto)
+
+    t0 = time.time()
+
+    print ("Recebendo dados .... ")
+
+    t1 = time.time()
+
+    vel = txLen/(t1-t0)
+
+    print("\n")
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    print("Tempo de transferência........................{}".format(t1-t0))
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    print("\n")
+    s
+    # Encerra comunicação
+    print("-------------------------")
+    print("Comunicação encerrada")
+    print("-------------------------")
+    self.com.disable()
 
 
 # Serial Com Port
@@ -23,109 +75,93 @@ serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 # serialName = "COM11"                  # Windows(variacao de)
 print("abriu com")
 
-def main():
-    # Inicializa enlace ... variavel com possui todos os metodos e propriedades do enlace, que funciona em threading
-    com = enlace(serialName) # repare que o metodo construtor recebe um string (nome)
-    # Ativa comunicacao
-    com.enable()
+# def main():
+#     # Inicializa enlace ... variavel com possui todos os metodos e propriedades do enlace, que funciona em threading
+#     com = enlace(serialName) # repare que o metodo construtor recebe um string (nome)
+#     # Ativa comunicacao
+#     com.enable()
 
    
 
-    # Log
-    print("-------------------------")
-    print("Comunicação inicializada")
-    print("  porta : {}".format(com.fisica.name))
-    print("-------------------------")
+#     # Log
+#     print("-------------------------")
+#     print("Comunicação inicializada")
+#     print("  porta : {}".format(com.fisica.name))
+#     print("-------------------------")
 
-    # Carrega dados
-    print ("gerando dados para transmissao :")
+#     # Carrega dados
+#     print ("gerando dados para transmissao :")
   
-      #no exemplo estamos gerando uma lista de bytes ou dois bytes concatenados
+#       #no exemplo estamos gerando uma lista de bytes ou dois bytes concatenados
     
-    #exemplo 1
-    #ListTxBuffer =list()
-    #for x in range(1,10):
-    #    ListTxBuffer.append(x)
-    #txBuffer = bytes(ListTxBuffer)
-    
-    #exemplo2
-    #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
-    txBuffer = open("cavalinho.jpeg", "rb").read()
-    #   txBuffer0 = aa.read()
-    #   f = bytearray(txBuffer0)
+#     #exemplo 1
+#     #ListTxBuffer =list()
+#     #for x in range(1,10):
+#     #    ListTxBuffer.append(x)
+#     #txBuffer = bytes(ListTxBuffer)
 
-    print("TxBuffer sem converter para int...........{}".format(txBuffer))
-    
-    
-    txLen    = len(txBuffer)
-    print(txLen)
+#     #exemplo2
+#     #txBuffer = bytes([2]) + bytes([3])+ bytes("teste", 'utf-8')
+#     txBuffer= open("cavalo.jpeg", "rb").read()
+#     #   txBuffer0 = aa.read()
+#     #   f = bytearray(txBuffer0)
 
-    imgSize = txLen.to_bytes(4, byteorder = "little")
-
-    bufferCompleto = imgSize + txBuffer
-
-    print("Buffer completo................{}".format(bufferCompleto))
-    print("imgSize...............{}".format(imgSize))
-
-    # Transmite dado
-    print("tentado transmitir .... {} bytes".format(txLen))
-    com.sendData(bufferCompleto)
-
-    t0 = time.time()
-
-    # espera o fim da transmissão
-    #while(com.tx.getIsBussy()):
-    #    pass
+#     print("TxBuffer sem converter para int...........{}".format(txBuffer))
     
     
-    # Atualiza dados da transmissão
-    #txSize = com.tx.getStatus()
-    #print ("Transmitido       {} bytes ".format(txSize))
+#     txLen    = len(txBuffer)
+#     print(txLen)
 
-    # Faz a recepção dos dados
-    print ("Recebendo dados .... ")
+#     imgSize = txLen.to_bytes(4, byteorder = "little")
+
+#     bufferCompleto = imgSize + txBuffer
+
+#     print("Buffer completo................{}".format(bufferCompleto))
+#     print("imgSize...............{}".format(imgSize))
+
+#     # Transmite dado
+#     print("tentado transmitir .... {} bytes".format(txLen))
+#     com.sendData(bufferCompleto)
+
+#     t0 = time.time()
+
+#     # espera o fim da transmissão
+#     #while(com.tx.getIsBussy()):
+#     #    pass
     
-    #repare que o tamanho da mensagem a ser lida é conhecida!     
-    #rxBuffer, nRx = com.getData(txLen)
-
-    # log
-    # print ("Lido              {} bytes ".format(nRx))
     
-    # print (rxBuffer)
-    print("\n")
-    print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("Esperando receber confirmação da chegada do arquivo")
-    print("- - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\n")
+#     # Atualiza dados da transmissão
+#     #txSize = com.tx.getStatus()
+#     #print ("Transmitido       {} bytes ".format(txSize))
 
-    while(com.rx.getIsEmpty()):
-        pass
+#     # Faz a recepção dos dados
+#     print ("Recebendo dados .... ")
+    
+#     #repare que o tamanho da mensagem a ser lida é conhecida!     
+#     #rxBuffer, nRx = com.getData(txLen)
 
-    rxBuffer, nRx = com.getData(4)
+#     # log
+#     # print ("Lido              {} bytes ".format(nRx))
+    
+#     # print (rxBuffer)
 
-    tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
+    
+#     t1 = time.time()
 
-    print("Confirmação do tamanho de imagem................{}".format(tamanhoConfirma))
+#     vel = txLen/(t1-t0)
 
+#     print("\n")
+#     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+#     print("Tempo de transferência........................{}".format(t1-t0))
+#     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+#     print("\n")
+#     s
+#     # Encerra comunicação
+#     print("-------------------------")
+#     print("Comunicação encerrada")
+#     print("-------------------------")
+#     com.disable()
 
-    t1 = time.time()
-
-    vel = txLen/(t1-t0)
-
-    print("\n")
-    print("- - - - - - - - - - - - - - - - - - - - - -")
-    print("Tempo de transferencia.............{} s".format(t1-t0))
-    print("- - - - - - - - - - - - - - - - - - - - - -")
-    print("Velocidade de transferencia........{} bytes/s".format(vel))
-    print("- - - - - - - - - - - - - - - - - - - - - -")
-    print("\n")
-
-    # Encerra comunicação
-    print("-------------------------")
-    print("Comunicação encerrada")
-    print("-------------------------")
-    com.disable()
-
-    #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
-if __name__ == "__main__":
-    main()
+#     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
+# if __name__ == "__main__":
+#     main()
