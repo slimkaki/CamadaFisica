@@ -34,9 +34,31 @@ class Client(object):
 
     txLen    = len(txBuffer)
 
+    # Para encher nosso Payload com informação inútil que vai evitar o servidor,
+    # em uma improbabilidade detectar o padrão do EoP, iremos colocar o Data Stuffing
+    # com um padrão único a cada 3 bytes diferentes.
+
+    c = 0 #contador
+    dataStuff = ['/xf0/xf0/xf0/xf0']
+    txEncoding = txBuffer.split("/")
+    i = 0
+    while (i < len(txEncoding)):
+      if c == 2:
+        txEncoding = txEncoding[:i+1] + dataStuff + txEncoding[i+1:]
+        i+=2
+        c=0
+      else:
+        i+=1
+        c+=1
+        pass
+
+    bufferWithStuffedData = "/".join(txEncoding) # txBuffer entrelaçado com data Stuffing, agora novamente em uma string só ao invés de uma lista
+
     imgSize = txLen.to_bytes(4, byteorder = "little")
 
-    bufferCompleto = imgSize + txBuffer
+    EoP = b'xf0/xf1/xf2/xf3' # End of package
+
+    bufferCompleto = imgSize + bufferWithStuffedData + EoP
 
     print("Buffer completo................{}".format(bufferCompleto))
     print("imgSize...............{}".format(imgSize))

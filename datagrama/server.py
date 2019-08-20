@@ -38,32 +38,32 @@ class Server(object):
     print ("Leitura do tamanho da imagem..................................{}  ".format(tamanhoIntimagem))
 
     rxBuffer, nRx = self.com.getData(tamanhoIntimagem)
-    rxLeitura = rxBuffer.split("/")
+    rxLeitura = rxBuffer.split()'/'
 
     contador = ""
     i = 0 # contador
     while (i < len(rxLeitura)):
-      if rxLeitura[i]=="xF0":
-        contador="xF0"
+      if rxLeitura[i]=="xf0":
+        contador="xf0"
         i+=1
-      elif rxLeitura[i]=="xF1" and contador=="xF0":
-        contador+="/xF1"
+      elif rxLeitura[i]=="xf1" and contador=="xf0":
+        contador+="/xf1"
         i+=1
-      elif rxLeitura[i]=="xF2" and contador=="xF0/xF1":
-        contador+="/xF2"
+      elif rxLeitura[i]=="xf2" and contador=="xf0/xf1":
+        contador+="/xf2"
         i+=1
-      elif rxLeitura[i]=="xF3" and contador=="xF0/xF1/xF2":
-        contador+="/xF3"
+      elif rxLeitura[i]=="xf3" and contador=="xf0/xf1/xf2":
+        contador+="/xf3"
         i+=1
       else:
         contador=""
         i+=1
         pass
-      if contador=="xF0/xF1/xF2/xF3":
+      if contador=="xf0/xf1/xf2/xf3":
         novaImagem = rxLeitura[:i-4]
         break
-
-
+    
+    
 
     # Faz a recepção dos dados
     print ("Recebendo dados .... ")
