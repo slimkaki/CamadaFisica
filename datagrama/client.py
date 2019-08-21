@@ -30,8 +30,6 @@ class Client(object):
 
     txBuffer= open(self.nomeArquivo, "rb").read()
 
-    #print("TxBuffer sem converter para int...........{}".format(txBuffer))
-
     txLen    = len(txBuffer)
 
     # Para encher nosso Payload com informação inútil que vai evitar o servidor,
@@ -39,16 +37,7 @@ class Client(object):
     # com um padrão único a cada 3 bytes diferentes.
 
     dataStuff = b'\xf0\xf0\xf0\xf0'
-    # while (i < len(txBuffer)):
-    #   if c == 2:
-    #     txBuffer1 = txBuffer[:i] + dataStuff + txBuffer[i:]
-    #     i+=2
-    #     c=0
-    #     print("PINTO")
-    #   else:
-    #     i+=1
-    #     c+=1
-    #     pass
+
     EoP = b'\xf0\xf1\xf2\xf3' # End of package
     
     txBuffer = txBuffer.replace(EoP,dataStuff)
@@ -70,13 +59,25 @@ class Client(object):
 
     print ("Recebendo dados .... ")
 
+    while (self.com.rx.getIsEmpty()):
+      pass
+
+    rxBuffer, nRx = self.com.getData(4)
+
+    tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
+
+    print("Confirmação do tamanho da imagem....................{}".format(tamanhoConfirma))
     t1 = time.time()
 
-    vel = txLen/(t1-t0)
+    tempo = t1-t0
+
+    vel = txLen/(tempo)
 
     print("\n")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-    print("Tempo de transferência........................{}".format(t1-t0))
+    print("Tempo de transferência........................{}".format(tempo))
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    print("Velocidade da transmissão......................{} bytes/s".format(vel))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("\n")
     
