@@ -30,7 +30,7 @@ class Client(object):
 
     txBuffer= open(self.nomeArquivo, "rb").read()
 
-    print("TxBuffer sem converter para int...........{}".format(txBuffer))
+    #print("TxBuffer sem converter para int...........{}".format(txBuffer))
 
     txLen    = len(txBuffer)
 
@@ -38,29 +38,28 @@ class Client(object):
     # em uma improbabilidade detectar o padrão do EoP, iremos colocar o Data Stuffing
     # com um padrão único a cada 3 bytes diferentes.
 
-    c = 0 #contador
-    dataStuff = ['/xf0/xf0/xf0/xf0']
-    txEncoding = txBuffer.split("/")
-    i = 0
-    while (i < len(txEncoding)):
-      if c == 2:
-        txEncoding = txEncoding[:i+1] + dataStuff + txEncoding[i+1:]
-        i+=2
-        c=0
-      else:
-        i+=1
-        c+=1
-        pass
+    dataStuff = b'\xf0\xf0\xf0\xf0'
+    # while (i < len(txBuffer)):
+    #   if c == 2:
+    #     txBuffer1 = txBuffer[:i] + dataStuff + txBuffer[i:]
+    #     i+=2
+    #     c=0
+    #     print("PINTO")
+    #   else:
+    #     i+=1
+    #     c+=1
+    #     pass
+    EoP = b'\xf0\xf1\xf2\xf3' # End of package
+    
+    txBuffer = txBuffer.replace(EoP,dataStuff)
 
-    bufferWithStuffedData = "/".join(txEncoding) # txBuffer entrelaçado com data Stuffing, agora novamente em uma string só ao invés de uma lista
+    txLen    = len(txBuffer)
 
     imgSize = txLen.to_bytes(4, byteorder = "little")
 
-    EoP = b'xf0/xf1/xf2/xf3' # End of package
+    bufferCompleto = imgSize + txBuffer + EoP
 
-    bufferCompleto = imgSize + bufferWithStuffedData + EoP
-
-    print("Buffer completo................{}".format(bufferCompleto))
+    #print("Buffer completo................{}".format(bufferCompleto))
     print("imgSize...............{}".format(imgSize))
 
     # Transmite dado
