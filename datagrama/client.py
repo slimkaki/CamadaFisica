@@ -45,7 +45,7 @@ class Client(object):
 
     print('- - - - - - - - - - - - - - -')
     print('  Protocolo de Empacotamento ')
-    print('\nHead...............{}'.format(tamanhoIntimagem))
+    print('\nHead...............{}'.format(txLen))
     print('\nEoP................{}'.format(EoP))
     print('\nData Stuffing......{}'.format(dataStuff))
     print('\n- - - - - - - - - - - - - - -')
