@@ -42,6 +42,13 @@ class Client(object):
     dataStuff = b'\xf0\xf0\xf0\xf0' # data stuffing
 
     EoP = b'\xf0\xf1\xf2\xf3' # End of Package
+
+    print('- - - - - - - - - - - - - - -')
+    print('  Protocolo de Empacotamento ')
+    print('\nHead...............{}'.format(tamanhoIntimagem))
+    print('\nEoP................{}'.format(EoP))
+    print('\nData Stuffing......{}'.format(dataStuff))
+    print('\n- - - - - - - - - - - - - - -')
     
     txBuffer = txBuffer.replace(EoP,dataStuff)
 
@@ -52,7 +59,6 @@ class Client(object):
     bufferCompleto = imgSize + txBuffer + EoP
 
     #print("Buffer completo................{}".format(bufferCompleto))
-    print("imgSize...............{}".format(imgSize))
 
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(txLen))

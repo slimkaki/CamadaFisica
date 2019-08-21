@@ -39,11 +39,18 @@ class Server(object):
     print ("Leitura do tamanho da imagem..................................{}  ".format(tamanhoIntimagem))
 
     rxBuffer, nRx = self.com.getData(tamanhoIntimagem)
-    print("\nlen do rxBuffer...........{}\n".format(len(rxBuffer)))
+    # print("\nlen do rxBuffer...........{}\n".format(len(rxBuffer)))
 
     dataStuff = b'\xf0\xf0\xf0\xf0'
 
     EoP = b"\xf0\xf1\xf2\xf3"
+
+    print('- - - - - - - - - - - - - - -')
+    print('  Protocolo de Empacotamento ')
+    print('\nHead...............{}'.format(tamanhoIntimagem))
+    print('\nEoP................{}'.format(EoP))
+    print('\nData Stuffing......{}'.format(dataStuff))
+    print('\n- - - - - - - - - - - - - - -')
 
     novaImagem = rxBuffer
 
@@ -51,17 +58,9 @@ class Server(object):
     novaImagem = rxBuffer[:i]
     print("EoP retirado")
 
-    findDataStuff = novaImagem.find(dataStuff)
-
-    #caso DataStuff tenha sido colocado na img o codigo abaixo resolve isso
-    while (findDataStuff > 0):
-
-      print("Voltando DataStuff para a forma original para n distorcer a img")
-      findDataStuff = novaImagem.find(dataStuff)
-      novaImagem = novaImagem[findDataStuff].replace(EoP)
-
-
     novaImagem = novaImagem.replace(dataStuff, EoP)
+
+    print("Data Stuff substituído pela sequência EoP")
 
     # Faz a recepção dos dados
     print ("Recebendo dados .... ")
