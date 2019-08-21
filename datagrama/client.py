@@ -32,19 +32,22 @@ class Client(object):
 
     txLen    = len(txBuffer)
 
-    # Para encher nosso Payload com informação inútil que vai evitar o servidor,
-    # em uma improbabilidade detectar o padrão do EoP, iremos colocar o Data Stuffing
-    # com um padrão único a cada 3 bytes diferentes.
+    """"
+      Por conta do pacote enviado possuir agora, além de um head, um EoP (End of Package), precisamos filtrar o nosso payload
+      (o conteúdo do pacote) para o caso de se ter bytes com a mesma informação do EoP, levando a uma transferência incompleta.
+      Para isso utilizamos de pacotes chamados de "Data Stuffing" que substitui toda info igual ao EoP como uma combinação específica
+      de bytes que, na chegada no servidor é traduzido para sua info original.
+    """
 
-    dataStuff = b'\xf0\xf0\xf0\xf0'
+    dataStuff = b'\xf0\xf0\xf0\xf0' # data stuffing
 
-    EoP = b'\xf0\xf1\xf2\xf3' # End of package
+    EoP = b'\xf0\xf1\xf2\xf3' # End of Package
     
     txBuffer = txBuffer.replace(EoP,dataStuff)
 
     txLen    = len(txBuffer)
 
-    imgSize = txLen.to_bytes(4, byteorder = "little")
+    imgSize = txLen.to_bytes(10, byteorder = "little")
 
     bufferCompleto = imgSize + txBuffer + EoP
 
@@ -62,7 +65,7 @@ class Client(object):
     while (self.com.rx.getIsEmpty()):
       pass
 
-    rxBuffer, nRx = self.com.getData(4)
+    rxBuffer, nRx = self.com.getData(10)
 
     tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
 
