@@ -19,6 +19,7 @@ class Server(object):
     self.com = enlace(serialName)
 
   def comunicate(self):
+    self.com.rx.clearBuffer()
     self.com.enable()
     print("-------------------------")
     print("Comunicação inicializada")
@@ -32,38 +33,75 @@ class Server(object):
       print("Aguardando pacote de informação")
       pass
 
-    rxBuffer, nRx = self.com.getData(10)
+    rxBuffer, size = self.com.getData(10)
 
-    print ("Leitura do tamanho da imagem em hexa..........................{}  ".format(nRx))
+    overhead = size
+
+    print ("Leitura do tamanho da imagem em hexa..........................{}  ".format(size))
     tamanhoIntimagem = int.from_bytes(rxBuffer, byteorder = "little")
     print ("Leitura do tamanho da imagem..................................{}  ".format(tamanhoIntimagem))
 
     rxBuffer, nRx = self.com.getData(tamanhoIntimagem)
     # print("\nlen do rxBuffer...........{}\n".format(len(rxBuffer)))
 
+    if (tamanhoIntimagem != nRx):
+      print("========================================")
+      print("Tamanho informado da imagem está errado!")
+      print("========================================")
+      ans = b'\x03'
+      self.com.sendData(ans)
+    else:
+      print("=============================================")
+      print("Tamanho da imagem foi informada corretamente!")
+      print("=============================================")
+
+
+    overhead += len(rxBuffer)
+
     dataStuff = b'\xf0\xf0\xf0\xf0'
 
     EoP = b"\xf0\xf1\xf2\xf3"
 
-    print('- - - - - - - - - - - - - - -')
+    print('- - - - - - - - - - - - - - - - -')
     print('  Protocolo de Empacotamento ')
-    print('\nHead...............{}'.format(tamanhoIntimagem))
-    print('\nEoP................{}'.format(EoP))
-    print('\nData Stuffing......{}'.format(dataStuff))
-    print('\n- - - - - - - - - - - - - - -')
+    print('Head...............{}'.format(tamanhoIntimagem))
+    print('EoP................{}'.format(EoP))
+    print('Data Stuffing......{}'.format(dataStuff))
+    print('- - - - - - - - - - - - - - - - -')
 
     novaImagem = rxBuffer
 
     i = rxBuffer.find(EoP)
-    novaImagem = rxBuffer[:i]
-    print("EoP retirado")
+    if (i > 0):
+      if (len(rxBuffer[i:])==len(EoP)):
+        novaImagem = rxBuffer[:i]
+        print("\nEoP encontrado na posição.......{}".format(i))
+        print("\nEoP retirado")
+        ans = b'\x01'
+        self.com.sendData(ans)
+      else:
+        print("===========================================")
+        print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
+        print("===========================================")
+        ans=b'\x02'
+        self.com.sendData(ans)
+    else:
+      print("============================")
+      print("ERRO: EoP NÃO ENCONTRADO")
+      print("============================")
+      ans = b'\x00'
+      self.com.sendData(ans)
+
+    overhead = overhead/len(novaImagem)
 
     novaImagem = novaImagem.replace(dataStuff, EoP)
 
-    print("Data Stuff substituído pela sequência EoP")
+    print("\nData Stuff substituído pela sequência EoP")
 
     # Faz a recepção dos dados
-    print ("Recebendo dados .... ")
+    print ("\nRecebendo dados .... ")
+
+    print('\nTamanho do overhead..........{} %'.format(overhead))
 
     # log
     print ("Lido........................{} bytes ".format(nRx))
@@ -78,13 +116,13 @@ class Server(object):
     print("- - - - - - - - - - - - - - - - -")
     print("\n")
 
-    imgSizeConfirmation = nRx.to_bytes(10, byteorder = "little")
+    # imgSizeConfirmation = len(rxBuffer).to_bytes(10, byteorder = "little")
 
-    self.com.sendData(imgSizeConfirmation)
+    # self.com.sendData(imgSizeConfirmation)
 
     print("\n")
 
     print("-------------------------")
-    print("Comunicação encerrada")
+    print(" Comunicação encerrada  ")
     print("-------------------------")
     self.com.disable()
