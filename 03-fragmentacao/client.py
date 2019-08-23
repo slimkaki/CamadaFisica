@@ -81,13 +81,20 @@ class Client(object):
     byte_slice = 0 # contador que corta o pacote por número de bytes
     i = 0
     t0 = time.time()
-    while (i < NoP):
+    print("Total de pacotes........................{}".format(NoP_bytes))
+    while (i <= NoP):
       j = i.to_bytes(2, byteorder='little')
       head = NoP_bytes + j
+      print('\nESSE É O HEAD.......{}\n'.format(head))
       if (byte_slice < txLen):
         buffer = head + txBuffer[byte_slice:byte_slice+120] + EoP
+        print("\nTamanho do pacote enviado.........{}".format(len(buffer)))
         self.com.sendData(buffer)
-        while (self.com.rx.getIsEmpty):
+        print("\nenviando pacote\n")
+        #self.com.rx.clearBuffer()
+        print('Esperando resposta do servidor...')
+        while (self.com.rx.getIsEmpty()):
+          #print("CADE INFO\n")
           pass
         conf, tam = self.com.getData(len(ans0))
         if (conf == ans0):
@@ -95,9 +102,9 @@ class Client(object):
           print('tentando novamente...\n')
           continue
         elif (conf == ans1):
-          print('Enviando pacote de número {}\n'.format(i))
+          print('Enviando pacote de número {0}/{1}\n'.format(i, NoP))
           i+=1
-          j+=120
+          byte_slice+=120
         elif (conf == ans2):
           print('EoP encontrado na posição errada do pacote....{}'.format(i))
           print('tentando novamente...\n')
@@ -113,7 +120,7 @@ class Client(object):
 
     print("\n")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-    print("Tempo de transferência (Throughput)........................{}".format(tempo))
+    print("Tempo de transferência (Throughput)........................{} s".format(tempo))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("Velocidade da transmissão......................{} bytes/s".format(vel))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
