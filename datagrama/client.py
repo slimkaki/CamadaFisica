@@ -19,6 +19,7 @@ class Client(object):
     self.com = enlace(serialName)
 
   def comunicate(self):
+    self.com.rx.clearBuffer()
     self.com.enable()
 
     print("-------------------------")
@@ -54,28 +55,49 @@ class Client(object):
 
     txLen    = len(txBuffer)
 
-    imgSize = txLen.to_bytes(10, byteorder = "little")
+    bufferCompleto = txBuffer + EoP
 
-    bufferCompleto = imgSize + txBuffer + EoP
+    head=len(bufferCompleto)
+
+    head = head.to_bytes(10, byteorder = "little")
+
+    bufferCompleto = head + bufferCompleto
+
 
     #print("Buffer completo................{}".format(bufferCompleto))
 
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(txLen))
-    self.com.sendData(bufferCompleto)
-
     t0 = time.time()
+
+    self.com.sendData(bufferCompleto)
 
     print ("Recebendo dados .... ")
 
     while (self.com.rx.getIsEmpty()):
       pass
 
-    rxBuffer, nRx = self.com.getData(10)
+    Yes=b"\x01"
+    No=b"\x00"
+    No2=b"\x02"
+    No3=b"\x03"
 
-    tamanhoConfirma = int.from_bytes(rxBuffer, byteorder="little")
+    Conf, tam = self.com.getData(len(Yes))
 
-    print("Confirmação do tamanho da imagem....................{}".format(tamanhoConfirma))
+
+
+    if Conf == Yes:
+        print("EoP...........ENCONTRADO")
+
+    elif Conf == No:
+        print("EoP.......NAO ENCONTRADO")
+
+    elif Conf == No2:
+        print("EoP.......ENCONTRADO EM POSICAO ERRADA")
+
+    elif Conf == No3:
+        print("Tamanho do HEAD informado incoeerente com Payload")
+
     t1 = time.time()
 
     tempo = t1-t0
@@ -84,7 +106,7 @@ class Client(object):
 
     print("\n")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-    print("Tempo de transferência........................{}".format(tempo))
+    print("Tempo de transferência (Throughput)........................{}".format(tempo))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("Velocidade da transmissão......................{} bytes/s".format(vel))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
