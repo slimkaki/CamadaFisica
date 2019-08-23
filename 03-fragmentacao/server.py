@@ -33,80 +33,67 @@ class Server(object):
       print("Aguardando pacote de informação")
       pass
 
-    rxBuffer, size = self.com.getData(10)
+    head, head_size = self.com.getData(4)
+    print ("\nRecebendo dados .... ")
 
-    overhead = size
+    Tpack = head[:1]
+    Tpack = int.from_bytes(Tpack,byteorder = "little")
+    print("Numero total de pacotes.......................{0}".format(Tpack))
 
-    print ("Leitura do tamanho da imagem em hexa..........................{}  ".format(size))
-    tamanhoIntimagem = int.from_bytes(rxBuffer, byteorder = "little")
-    print ("Leitura do tamanho da imagem..................................{}  ".format(tamanhoIntimagem))
-
-    rxBuffer, nRx = self.com.getData(tamanhoIntimagem)
-    # print("\nlen do rxBuffer...........{}\n".format(len(rxBuffer)))
-
-    if (tamanhoIntimagem != nRx):
-      print("========================================")
-      print("Tamanho informado da imagem está errado!")
-      print("========================================")
-      ans = b'\x03'
-      self.com.sendData(ans)
-    else:
-      print("=============================================")
-      print("Tamanho da imagem foi informada corretamente!")
-      print("=============================================")
-
-
-    overhead += len(rxBuffer)
+    Npack = head[2:]
+    Npack = int.from_bytes(Npack,byteorder = "little")
 
     dataStuff = b'\xf0\xf0\xf0\xf0'
 
     EoP = b"\xf0\xf1\xf2\xf3"
+    Payload = b""
+    
+    boolean = False
+
+    while (Npack<Tpack):
+
+      if (boolean):
+        while(self.com.rx.getIsEmpty()):
+          pass
+        head, head_size = self.com.getData(4)
+        Npack = head[2:]
+        Npack = int.from_bytes(Npack,byteorder = "little")
+        print("Npack atual ................{0}/{1}".format(Npack,Tpack))
+        print("  ")
+        print("===========================================")
+
+    
+      Pacote, Pack_Size = self.com.getData(124)
+      boolean = True
+
+      i = Pacote.find(EoP)
+      if (i > 0):
+        if (len(Pacote[i:])==len(EoP)):
+          Payload += Pacote[:i].replace(dataStuff, EoP)
+          ans = b'\x01'
+          self.com.sendData(ans)
+        else:
+          print("===========================================")
+          print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
+          print("===========================================")
+          ans=b'\x02'
+          self.com.sendData(ans)
+      else:
+        print("============================")
+        print("ERRO: EoP NÃO ENCONTRADO")
+        print("============================")
+        ans = b'\x00'
+        self.com.sendData(ans)
 
     print('- - - - - - - - - - - - - - - - -')
     print('  Protocolo de Empacotamento ')
-    print('Head...............{}'.format(tamanhoIntimagem))
+    print('Head...............{}'.format(head_size))
     print('EoP................{}'.format(EoP))
     print('Data Stuffing......{}'.format(dataStuff))
     print('- - - - - - - - - - - - - - - - -')
-
-    novaImagem = rxBuffer
-
-    i = rxBuffer.find(EoP)
-    if (i > 0):
-      if (len(rxBuffer[i:])==len(EoP)):
-        novaImagem = rxBuffer[:i]
-        print("\nEoP encontrado na posição.......{}".format(i))
-        print("\nEoP retirado")
-        ans = b'\x01'
-        self.com.sendData(ans)
-      else:
-        print("===========================================")
-        print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
-        print("===========================================")
-        ans=b'\x02'
-        self.com.sendData(ans)
-    else:
-      print("============================")
-      print("ERRO: EoP NÃO ENCONTRADO")
-      print("============================")
-      ans = b'\x00'
-      self.com.sendData(ans)
-
-    overhead = overhead/len(novaImagem)
-
-    novaImagem = novaImagem.replace(dataStuff, EoP)
-
-    print("\nData Stuff substituído pela sequência EoP")
-
     # Faz a recepção dos dados
-    print ("\nRecebendo dados .... ")
 
-    print('\nTamanho do overhead..........{} %'.format(overhead))
-
-    # log
-    print ("Lido........................{} bytes ".format(nRx))
-
-    open(self.nomeArquivo, "wb").write(rxBuffer)
+    open(self.nomeArquivo, "wb").write(Payload)
 
     print("\n")
     print("- - - - - - - - - - - - - - - - -")
@@ -115,13 +102,7 @@ class Server(object):
     print("Tentando enviar confirmação do tamanho recebido ao client")
     print("- - - - - - - - - - - - - - - - -")
     print("\n")
-
-    # imgSizeConfirmation = len(rxBuffer).to_bytes(10, byteorder = "little")
-
-    # self.com.sendData(imgSizeConfirmation)
-
     print("\n")
-
     print("-------------------------")
     print(" Comunicação encerrada  ")
     print("-------------------------")
