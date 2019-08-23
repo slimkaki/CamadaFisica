@@ -10,6 +10,7 @@
 
 from enlace import *
 import time
+import math
 
 class Client(object):
 
@@ -49,59 +50,65 @@ class Client(object):
     print('\nHead...............{}'.format(txLen))
     print('\nEoP................{}'.format(EoP))
     print('\nData Stuffing......{}'.format(dataStuff))
-    print('\n- - - - - - - - - - - - - - -')
+    print('\nTamanho de cada pacote......128 bytes'.format())
+    print('- - - - - - - - - - - - - - -')
     
     txBuffer = txBuffer.replace(EoP,dataStuff)
-
-    txLen    = len(txBuffer)
-
     bufferCompleto = txBuffer + EoP
+    txLen    = len(bufferCompleto)
 
-    head=len(bufferCompleto)
+    """
+    Como é necessário para o pacote ter 128 bytes segundo o protocolo, subtrai-se 4 bytes para formar o head
+    e logo calcula-se o número de pacotes a serem enviados com o buffer completo (buffer + EoP) dividido por 124 bytes
+    """
 
-    head = head.to_bytes(10, byteorder = "little")
+    NoP = math.ceil(txLen/124) # Number of Packages (função que arredonda qualquer valor que seja float para cima)
+    print('\n===============================================')
+    print(' Número de Pacotes a serem enviados.........{}'.format(NoP))
+    print('===============================================\n')
 
-    bufferCompleto = head + bufferCompleto
+    NoP_bytes = NoP.to_bytes(2, byteorder='little') # Transformando NoP em bytes para ser adicionado ao head
 
+    # Cada pacote será formulado e enviado no loop abaixo
+    # Serão enviados 120 bytes de payload e 4 reservados para o EoP
 
-    #print("Buffer completo................{}".format(bufferCompleto))
+    # Respostas do servidor em relação ao recebimento do pacote
+    ans0=b"\x00" # EoP não encontrado 
+    ans1=b"\x01" # EoP encontrado
+    ans2=b"\x02" # EoP encontrado na posição errada
+    #ans3=b"\x03" # Tamanho do pacote informado está errado
 
-    # Transmite dado
-    print("tentado transmitir .... {} bytes".format(txLen))
+    byte_slice = 0 # contador que corta o pacote por número de bytes
+    i = 0
     t0 = time.time()
-
-    self.com.sendData(bufferCompleto)
-
-    print ("Recebendo dados .... ")
-
-    while (self.com.rx.getIsEmpty()):
-      pass
-
-    Yes=b"\x01"
-    No=b"\x00"
-    No2=b"\x02"
-    No3=b"\x03"
-
-    Conf, tam = self.com.getData(len(Yes))
-
-
-
-    if Conf == Yes:
-        print("EoP...........ENCONTRADO")
-
-    elif Conf == No:
-        print("EoP.......NAO ENCONTRADO")
-
-    elif Conf == No2:
-        print("EoP.......ENCONTRADO EM POSICAO ERRADA")
-
-    elif Conf == No3:
-        print("Tamanho do HEAD informado incoeerente com Payload")
+    while (i < NoP):
+      j = i.to_bytes(2, byteorder='little')
+      head = NoP_bytes + j
+      if (byte_slice < txLen):
+        buffer = head + txBuffer[byte_slice:byte_slice+120] + EoP
+        self.com.sendData(buffer)
+        while (self.com.rx.getIsEmpty):
+          pass
+        conf, tam = self.com.getData(len(ans0))
+        if (conf == ans0):
+          print('EoP não encontrado no pacote....{}'.format(i))
+          print('tentando novamente...\n')
+          continue
+        elif (conf == ans1):
+          print('Enviando pacote de número {}\n'.format(i))
+          i+=1
+          j+=120
+        elif (conf == ans2):
+          print('EoP encontrado na posição errada do pacote....{}'.format(i))
+          print('tentando novamente...\n')
+          continue
+        else:
+          print('Erro inesperado no pacote {}'.format(i))
+          print('tentando novamente...\n')
+          continue
 
     t1 = time.time()
-
     tempo = t1-t0
-
     vel = txLen/(tempo)
 
     print("\n")
