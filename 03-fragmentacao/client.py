@@ -28,8 +28,6 @@ class Client(object):
     print("  porta : {}".format(self.com.fisica.name))
     print("-------------------------")
 
-    print ("gerando dados para transmissao :")
-
     txBuffer= open(self.nomeArquivo, "rb").read()
 
     txLen    = len(txBuffer)
@@ -47,7 +45,7 @@ class Client(object):
 
     print('- - - - - - - - - - - - - - -')
     print('  Protocolo de Empacotamento ')
-    print('\nHead...............{}'.format(txLen))
+    print('\nTamanho total............{} bytes'.format(txLen))
     print('\nEoP................{}'.format(EoP))
     print('\nData Stuffing......{}'.format(dataStuff))
     print('\nTamanho de cada pacote......128 bytes'.format())
@@ -81,37 +79,35 @@ class Client(object):
     byte_slice = 0 # contador que corta o pacote por número de bytes
     i = 0
     t0 = time.time()
-    print("Total de pacotes........................{}".format(NoP_bytes))
     while (i <= NoP):
       j = i.to_bytes(2, byteorder='little')
       head = NoP_bytes + j
-      print('\nESSE É O HEAD.......{}\n'.format(head))
       if (byte_slice < txLen):
         buffer = head + txBuffer[byte_slice:byte_slice+120] + EoP
-        print("\nTamanho do pacote enviado.........{}".format(len(buffer)))
+        #print("\nTamanho do pacote enviado.........{}".format(len(buffer)))
         self.com.sendData(buffer)
-        print("\nenviando pacote\n")
-        #self.com.rx.clearBuffer()
-        print('Esperando resposta do servidor...')
+        #print("\nenviando pacote\n")
+        #print('Esperando resposta do servidor...')
         while (self.com.rx.getIsEmpty()):
           #print("CADE INFO\n")
           pass
         conf, tam = self.com.getData(len(ans0))
         if (conf == ans0):
-          print('EoP não encontrado no pacote....{}'.format(i))
-          print('tentando novamente...\n')
+          # Mensagem de erro para pacote onde o EoP não foi encontrado pelo server e é dada re-enviado pelo client
           continue
         elif (conf == ans1):
-          print('Enviando pacote de número {0}/{1}\n'.format(i, NoP))
+          # Pacote enviado com sucesso
+          toConclude = round((i/NoP)*100,1)
+          print('Enviando pacotes................{}%\r'.format(toConclude), end='\r')
           i+=1
           byte_slice+=120
         elif (conf == ans2):
-          print('EoP encontrado na posição errada do pacote....{}'.format(i))
-          print('tentando novamente...\n')
+          # print('EoP encontrado na posição errada do pacote....{}'.format(i))
+          # print('tentando novamente...\n')
           continue
         else:
-          print('Erro inesperado no pacote {}'.format(i))
-          print('tentando novamente...\n')
+          # print('Erro inesperado no pacote {}'.format(i))
+          # print('tentando novamente...\n')
           continue
 
     t1 = time.time()
