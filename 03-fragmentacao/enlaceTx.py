@@ -81,7 +81,7 @@ class TX(object):
     def getStatus(self):
         """ Return the last transmission size
         """
-        print("O tamanho transmitido (Impressao fora do thread)  {}" .format(self.transLen))
+        #print("O tamanho transmitido (Impressao fora do thread)  {}" .format(self.transLen))
         return(self.transLen)
         
 
