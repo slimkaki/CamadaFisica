@@ -36,9 +36,19 @@ class Server(object):
     head, head_size = self.com.getData(4)
     print ("\nRecebendo dados .... ")
 
-    Tpack = head[:1]
+    print('\n- - - - - - - - - - - - - - - - -')
+    print('  Protocolo de Empacotamento ')
+    print('Head...............{} bytes'.format(head_size))
+    print('EoP................{}'.format(EoP))
+    print('Data Stuffing......{}'.format(dataStuff))
+    print('- - - - - - - - - - - - - - - - -')
+
+    Tpack = head[:2]
     Tpack = int.from_bytes(Tpack,byteorder = "little")
+    print("\n===================================================")
     print("Numero total de pacotes.......................{0}".format(Tpack))
+    print("===================================================\n")
+
 
     Npack = head[2:]
     Npack = int.from_bytes(Npack,byteorder = "little")
@@ -58,10 +68,8 @@ class Server(object):
         head, head_size = self.com.getData(4)
         Npack = head[2:]
         Npack = int.from_bytes(Npack,byteorder = "little")
-        print("Npack atual ................{0}/{1}".format(Npack,Tpack))
-        print("  ")
-        print("===========================================")
-
+        toConclude = round((Npack/Tpack)*100,1)
+        print("Recebendo pacotes................{}%\r".format(toConclude), end='\r')
     
       Pacote, Pack_Size = self.com.getData(124)
       boolean = True
@@ -73,24 +81,18 @@ class Server(object):
           ans = b'\x01'
           self.com.sendData(ans)
         else:
-          print("===========================================")
-          print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
-          print("===========================================")
+          #print("===========================================")
+          #print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
+          #print("===========================================")
           ans=b'\x02'
           self.com.sendData(ans)
       else:
-        print("============================")
-        print("ERRO: EoP NÃO ENCONTRADO")
-        print("============================")
+        #print("============================")
+        #print("ERRO: EoP NÃO ENCONTRADO")
+        #print("============================")
         ans = b'\x00'
         self.com.sendData(ans)
 
-    print('- - - - - - - - - - - - - - - - -')
-    print('  Protocolo de Empacotamento ')
-    print('Head...............{}'.format(head_size))
-    print('EoP................{}'.format(EoP))
-    print('Data Stuffing......{}'.format(dataStuff))
-    print('- - - - - - - - - - - - - - - - -')
     # Faz a recepção dos dados
 
     open(self.nomeArquivo, "wb").write(Payload)
@@ -99,9 +101,7 @@ class Server(object):
     print("- - - - - - - - - - - - - - - - -")
     print("Arquivo foi salvo no diretório com o nome de: {}".format(self.nomeArquivo))
     print("- - - - - - - - - - - - - - - - -")
-    print("Tentando enviar confirmação do tamanho recebido ao client")
     print("- - - - - - - - - - - - - - - - -")
-    print("\n")
     print("\n")
     print("-------------------------")
     print(" Comunicação encerrada  ")

@@ -32,15 +32,15 @@ def main():
     getSerial = getSerial.decode("utf-8")
     getSerial = getSerial.split("\n")
     del getSerial[-1]
-    getSerial = getSerial.replace(" ", "")
     print("Qual porta do seu computador você está utilizando?")
     for i in range(0, len(getSerial)):
       print("{} - {}".format(i, getSerial[i]))
       print("\n")
     print("Digite o número da porta...\n")
     choice = int(input("> "))
+
     if (choice < len(getSerial) and choice >= 0):
-      serialName = getSerial[choice]
+      serialName = getSerial[choice].strip()
     else:
       print("Digite a porta a seguir:")
       serialName = input("> ")
@@ -61,8 +61,6 @@ def main():
     else:
       print("Digite a porta a seguir:")
       serialName = input("> ")
-
-  print("abriu com")
 
   print("\n")
   print("---------------------------------")
