@@ -71,9 +71,9 @@ class Client(object):
     # Serão enviados 120 bytes de payload e 4 reservados para o EoP
 
     # Respostas do servidor em relação ao recebimento do pacote
-    ans0=b"\x00" # EoP não encontrado 
-    ans1=b"\x01" # EoP encontrado
-    ans2=b"\x02" # EoP encontrado na posição errada
+    ans0 = 0 # EoP não encontrado 
+    ans1 = 1 # EoP encontrado
+    ans2 = 2 # EoP encontrado na posição errada
     #ans3=b"\x03" # Tamanho do pacote informado está errado
 
     byte_slice = 0 # contador que corta o pacote por número de bytes
@@ -83,27 +83,31 @@ class Client(object):
       j = i.to_bytes(2, byteorder='little')
       head = NoP_bytes + j
       if (byte_slice < txLen):
-        buffer = head + txBuffer[byte_slice:byte_slice+120] + EoP
+        buffer = head + txBuffer[byte_slice:byte_slice+128] + EoP
         #print("\nTamanho do pacote enviado.........{}".format(len(buffer)))
         self.com.sendData(buffer)
         #print("\nenviando pacote\n")
         #print('Esperando resposta do servidor...')
         while (self.com.rx.getIsEmpty()):
-          #print("CADE INFO\n")
           pass
-        conf, tam = self.com.getData(len(ans0))
-        if (conf == ans0):
+        conf, tam = self.com.getData(128)
+        ans = int.from_bytes(conf[4], byteorder='little')
+        if (ans == ans0):
           # Mensagem de erro para pacote onde o EoP não foi encontrado pelo server e é dada re-enviado pelo client
+          i = int.from_bytes(conf[2:4], byteorder='little')
+          byte_slice = i*128
           continue
-        elif (conf == ans1):
+        elif (ans == ans1):
           # Pacote enviado com sucesso
           toConclude = round((i/NoP)*100,1)
           print('Enviando pacotes................{}%\r'.format(toConclude), end='\r')
           i+=1
-          byte_slice+=120
-        elif (conf == ans2):
+          byte_slice+=128
+        elif (ans == ans2):
           # print('EoP encontrado na posição errada do pacote....{}'.format(i))
           # print('tentando novamente...\n')
+          i = int.from_bytes(conf[2:4], byteorder='little')
+          byte_slice = i*128
           continue
         else:
           # print('Erro inesperado no pacote {}'.format(i))

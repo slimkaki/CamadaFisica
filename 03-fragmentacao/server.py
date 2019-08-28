@@ -46,7 +46,7 @@ class Server(object):
     Tpack = head[:2]
     Tpack = int.from_bytes(Tpack,byteorder = "little")
     print("\n===================================================")
-    print("Numero total de pacotes.......................{0}".format(Tpack))
+    print("Número total de pacotes.......................{0}".format(Tpack))
     print("===================================================\n")
 
 
@@ -71,27 +71,33 @@ class Server(object):
         toConclude = round((Npack/Tpack)*100,1)
         print("Recebendo pacotes................{}%\r".format(toConclude), end='\r')
     
-      Pacote, Pack_Size = self.com.getData(124)
+      Pacote, Pack_Size = self.com.getData(132)
       boolean = True
 
       i = Pacote.find(EoP)
       if (i > 0):
         if (len(Pacote[i:])==len(EoP)):
           Payload += Pacote[:i].replace(dataStuff, EoP)
-          ans = b'\x01'
-          self.com.sendData(ans)
+          ans = 1
+          ans = ans.to_bytes(128, byteorder='little')
+          sendAnswer = head + ans + EoP 
+          self.com.sendData(sendAnswer)
         else:
           #print("===========================================")
           #print("ERRO: EoP NÃO ENCONTRADO NO LOCAL ESPERADO")
           #print("===========================================")
-          ans=b'\x02'
-          self.com.sendData(ans)
+          ans = 2
+          ans = ans.to_bytes(128, byteorder='little')
+          sendAnswer = head + ans + EoP 
+          self.com.sendData(sendAnswer)
       else:
         #print("============================")
         #print("ERRO: EoP NÃO ENCONTRADO")
         #print("============================")
-        ans = b'\x00'
-        self.com.sendData(ans)
+        ans = 0
+        ans = ans.to_bytes(128, byteorder='little')
+        sendAnswer = head + ans + EoP 
+        self.com.sendData(sendAnswer)
 
     # Faz a recepção dos dados
 
