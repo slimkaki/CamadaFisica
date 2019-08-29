@@ -36,6 +36,9 @@ class Server(object):
     head, head_size = self.com.getData(4)
     print ("\nRecebendo dados .... ")
 
+    dataStuff = b'\xf0\xf0\xf0\xf0'
+    EoP = b"\xf0\xf1\xf2\xf3"
+
     print('\n- - - - - - - - - - - - - - - - -')
     print('  Protocolo de Empacotamento ')
     print('Head...............{} bytes'.format(head_size))
@@ -53,9 +56,6 @@ class Server(object):
     Npack = head[2:]
     Npack = int.from_bytes(Npack,byteorder = "little")
 
-    dataStuff = b'\xf0\xf0\xf0\xf0'
-
-    EoP = b"\xf0\xf1\xf2\xf3"
     Payload = b""
     
     boolean = False

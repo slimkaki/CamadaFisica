@@ -10,6 +10,7 @@
 
 from enlace import *
 import time
+import datetime as dt
 import math
 
 class Client(object):
@@ -60,7 +61,7 @@ class Client(object):
     e logo calcula-se o número de pacotes a serem enviados com o buffer completo (buffer + EoP) dividido por 124 bytes
     """
 
-    NoP = math.ceil(txLen/124) # Number of Packages (função que arredonda qualquer valor que seja float para cima)
+    NoP = math.ceil(txLen/132) # Number of Packages (função que arredonda qualquer valor que seja float para cima)
     print('\n===============================================')
     print(' Número de Pacotes a serem enviados.........{}'.format(NoP))
     print('===============================================\n')
@@ -90,8 +91,8 @@ class Client(object):
         #print('Esperando resposta do servidor...')
         while (self.com.rx.getIsEmpty()):
           pass
-        conf, tam = self.com.getData(128)
-        ans = int.from_bytes(conf[4], byteorder='little')
+        conf, tam = self.com.getData(136)
+        ans = conf[4]
         if (ans == ans0):
           # Mensagem de erro para pacote onde o EoP não foi encontrado pelo server e é dada re-enviado pelo client
           i = int.from_bytes(conf[2:4], byteorder='little')
@@ -117,10 +118,13 @@ class Client(object):
     t1 = time.time()
     tempo = t1-t0
     vel = txLen/(tempo)
+    minutes = str(dt.timedelta(seconds=tempo))
 
     print("\n")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("Tempo de transferência (Throughput)........................{} s".format(tempo))
+    print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+    print("Tempo (em minutos)........................{}".format(minutes))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
     print("Velocidade da transmissão......................{} bytes/s".format(vel))
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
