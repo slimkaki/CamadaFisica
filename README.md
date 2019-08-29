@@ -29,3 +29,15 @@
 
     - para rodar: python aplicacao.py
           ou no Ubuntu: sudo python3 aplicacao.py
+
+### 04 – Protocolo de comunicação UART ponto a ponto
+
+    O objetivo é implementar um software em dois equipamentos que se comunicam serialmente com padrão UART. 
+    A comunicação deve ser feita para envio de um arquivo de um cliente para um servidor. 
+
+    Cada datagrama enviado deve conter no head obrigatoriamente o tipo de mensagem que ele representa e o tamanho do
+    payload. Um único byte deve ser reservado no head para conter o número representativo do tipo de mensagem. Dado o tipo de
+    mensagem, algumas outras informações devem estar no head, como definido a seguir.
+
+    - para rodar: python aplicacao.py
+          ou no Ubuntu: sudo python3 aplicacao.py
