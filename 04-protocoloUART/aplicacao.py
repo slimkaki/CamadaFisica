@@ -76,23 +76,45 @@ def main():
     nomeArquivo = input("> ")
     print("- - - - - - - - - - - - - - - - - - - - - -")
     serverInit(serialName, nomeArquivo)
-    print("Iniciando comunicação server - client via conexão UART ......")
     
   elif (platform == 2):
     print("- - - - - - - - - - - - - - - - - - - - - -")
+    print("Deseja se conectar com qual servidor? (id do servidor)\n")
+    idServer = input("> ")
+    idServer = idServer.to_bytes(1, byteorder='little')
+    print("- - - - - - - - - - - - - - - - - - - - - -")
     print("Informe o nome do arquivo a ser enviado, junto")
-    print("  à sua extensão (PNG, JPG, JPEG, etc...)  ")
+    print("  à sua extensão (PNG, JPG, JPEG, etc...)  \n")
     nomeArquivo = input("> ")
     print("- - - - - - - - - - - - - - - - - - - - - -")
-    clientInit(serialName, nomeArquivo)
+    clientInit(serialName, nomeArquivo, idServer)
   else:
     print("[ERRO] Digite um número")
 
-def clientInit(serialName, nomeArquivo):
-  cli = Client(serialName, nomeArquivo)
-  cli.comunicate()
+def clientInit(serialName, nomeArquivo, idServer):
+  cli = Client(serialName, nomeArquivo, idServer)
+  cli.start()
   cli.msg1()
-  cli.constructPack()
+  print('\nTentando comunicação com o servidor')
+  cli.startCom(idServer)
+  print('\n----------------------------------------')
+  print(f'    Comunicando com servidor: {idServer}!')
+  print('----------------------------------------\n')
+  print(f'Iniciando o envio do arquivo "{nomeArquivo}"\n')
+  t0 = time.time()
+  cli.sendImage()
+  t1 = time.time()
+  tempo = t1 - t0
+  vel = cli.txLen/(tempo)
+  minutes = str(dt.timedelta(seconds=tempo))
+  print("\n")
+  print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  print("Tempo de transferência (Throughput)........................{} s".format(tempo))
+  print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  print("Tempo (em minutos)........................{}".format(minutes))
+  print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  print("Velocidade da transmissão......................{} bytes/s".format(vel))
+  print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
   cli.stopCom()
 
 def serverInit(serialName, nomeArquivo):
