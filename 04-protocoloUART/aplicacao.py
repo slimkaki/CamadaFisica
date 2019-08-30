@@ -75,19 +75,29 @@ def main():
     print("  à sua extensão (PNG, JPG, JPEG, etc...)  ")
     nomeArquivo = input("> ")
     print("- - - - - - - - - - - - - - - - - - - - - -")
-    serv = Server(serialName, nomeArquivo)
+    serverInit(serialName, nomeArquivo)
     print("Iniciando comunicação server - client via conexão UART ......")
-    serv.comunicate()
+    
   elif (platform == 2):
     print("- - - - - - - - - - - - - - - - - - - - - -")
     print("Informe o nome do arquivo a ser enviado, junto")
     print("  à sua extensão (PNG, JPG, JPEG, etc...)  ")
     nomeArquivo = input("> ")
     print("- - - - - - - - - - - - - - - - - - - - - -")
-    cli = Client(serialName, nomeArquivo)
-    cli.comunicate()
+    clientInit(serialName, nomeArquivo)
   else:
     print("[ERRO] Digite um número")
+
+def clientInit(serialName, nomeArquivo):
+  cli = Client(serialName, nomeArquivo)
+  cli.comunicate()
+  cli.msg1()
+  cli.constructPack()
+  cli.stopCom()
+
+def serverInit(serialName, nomeArquivo):
+  serv = Server(serialName, nomeArquivo)
+  serv.comunicate()
 
 def getOS():
   OS = {'linux': 'Linux',
