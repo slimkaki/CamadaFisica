@@ -119,8 +119,11 @@ def clientInit(serialName, nomeArquivo, idServer):
 
 def serverInit(serialName, nomeArquivo):
   serv = Server(serialName, nomeArquivo)
-  serv.comunicate()
-
+  serv.start()
+  serv.WaitInfo(16)
+  serv.receiveImg()
+  serv.save()
+  serv.finish()
 def getOS():
   OS = {'linux': 'Linux',
     'linux1': 'Linux',
