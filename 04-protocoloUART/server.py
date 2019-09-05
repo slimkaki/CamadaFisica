@@ -222,13 +222,13 @@ class Server(object):
     #salvando informacoes do head
 
 
-    self.Tp = head[2:6]
+    self.tp = head[2:6]
   
-    self.Tp = int.from_bytes(self.Tp,byteorder = "little")
+    self.tp = int.from_bytes(self.tp,byteorder = "little")
 
-    self.Np = head[6:10]
+    self.np = head[6:10]
 
-    self.Np = int.from_bytes(self.Np,byteorder = "little")
+    self.np = int.from_bytes(self.np,byteorder = "little")
 
     self.TPayload = head[10:]
 
@@ -237,7 +237,6 @@ class Server(object):
     self.com.getData(132)
 
     print("+++++++++++++++pacote inicial salvo++++++++++")
-    
 
   def save(self):
     open(self.nomeArquivo, "wb").write(self.Payload)
