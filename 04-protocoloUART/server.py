@@ -31,24 +31,29 @@ class Server(object):
     self.dataStuff=b'\xf0\xf0\xf0\xf0'
 
   def start(self):
+
     self.com.rx.clearBuffer()
     self.com.enable()
-    print("+++++++++iniciando server+++++++")
+    print("+++++++++++++++iniciando server+++++++++++++++")
+
   def WaitInfo(self, noBytes): # noBytes = Number of Bytes
 
     dataStuff = b'\xf0\xf0\xf0\xf0'
     EoP = b"\xf0\xf1\xf2\xf3"
 
     while(self.ocioso):
-      print("++++++Esperando comunicação+++++++++")
+      print("+++++++++++++++Esperando comunicação+++++++++++++++")
+
       while (self.com.rx.getIsEmpty()):
         pass
-      print("+++++++++tentativa de comunicação identificada++++++++")
+
+      print("+++++++++++++++tentativa de comunicação identificada+++++++++++++++")
       head, head_size = self.com.getData(noBytes)
       
       cliente_id = head[0]
+
       Tipo = head[1]
-      #Tipo = int.from_bytes(Tipo,byteorder = "little")
+
       msg1 = 1
 
       #recebeu t1
@@ -67,7 +72,8 @@ class Server(object):
 
           self.cont=1
 
-          print("+++++++++Mensagem confirmada para mim+++++++")
+          print("+++++++++++++++Mensagem confirmada para mim+++++++++++++++")
+
         else:
 
           time.sleep(1)
@@ -80,28 +86,28 @@ class Server(object):
   
 
   def receiveImg(self):
-    print("+++++++continuando comunicacao++++++++++")
 
-    self.cont=1
+    print("+++++++++++++++continuando comunicacao+++++++++++++++")
+
+    self.cont=int(1)
+
     tp = int.from_bytes(self.tp,byteorder='little')
 
-    print(str(self.cont) + "<cont sssssssssssss tp>" + str(tp))
-
     while (self.cont <= tp):
-      print(self.cont)
+
+
       while (self.com.rx.getIsEmpty()):
         pass
 
-      atual = self.com.getData(16)
+      atual, lenatual = self.com.getData(16)
       
-      tipo = atual[1:2]
-      tipo = int.from_bytes(tipo, byteorder='little')
-      print("++++++++++++++++++++++++++++++++++++"+tipo)
-      self.corpo = self.com.getData(132)
-      find = self.corpo.find(self.EoP)
-      
-      if (tipo == 3):
+      tipo = atual[1]
 
+      self.corpo, lencorpo = self.com.getData(132)
+
+      find = self.corpo.find(self.EoP)
+
+      if (tipo == 3):
 
         if (find>0):
           
@@ -116,14 +122,12 @@ class Server(object):
         else:
 
           self.msg6()
+
           self.com.sendData(self.msg)
 
       else:
 
         time.sleep(1)
-
-        self.Wait()
-
 
   def msg2(self):
   
@@ -135,21 +139,15 @@ class Server(object):
     payload = 0
     payload = payload.to_bytes(128,byteorder = "little")
 
-    self.id = self.id.to_bytes(1, byteorder='little')
+    id1 = self.id.to_bytes(1, byteorder='little')
 
-    self.np = self.np.to_bytes(4, byteorder='little')
-
-    self.tp = self.tp.to_bytes(4, byteorder='little')
-
-    self.TPayload = self.TPayload.to_bytes(6, byteorder='little')
-
-    head = self.id + tipo + self.np + self.tp + self.TPayload
+    head = id1 + tipo + self.np + self.tp + self.TPayload
 
     msg2 = head + payload + self.EoP
 
     self.msg = msg2
 
-    print("***************enviando msg 2222222**********")
+    print("+++++++++++++++enviando msg 2+++++++++++++++")
 
 
   def msg4(self):
@@ -157,24 +155,16 @@ class Server(object):
   #Mensagem do tipo 2: Convida o servidor para iniciar a comunicação
 
     tipo = 4
+
     tipo = tipo.to_bytes(1, byteorder='little')
 
     payload = 0
+
     payload = payload.to_bytes(128,byteorder = "little")
     
+    id1 = self.id.to_bytes(1, byteorder='little')
 
-
-    self.id = self.id.to_bytes(1, byteorder='little')
-
-    self.np = self.np.to_bytes(4, byteorder='little')
-
-    self.tp = self.tp.to_bytes(4, byteorder='little')
-
-    self.TPayload = self.TPayload.to_bytes(6, byteorder='little')
-
-    head = self.id + tipo + self.np + self.tp + self.TPayload
-
-    head = self.id + tipo + self.np + self.tp + self.TPayload
+    head = id1 + tipo + self.np + self.tp + self.TPayload
 
     msg4 = head + payload + self.EoP
 
@@ -190,22 +180,15 @@ class Server(object):
     payload = 0
     payload = payload.to_bytes(128,byteorder = "little")
 
-    self.id = self.id.to_bytes(1, byteorder='little')
+    id1 = self.id.to_bytes(1, byteorder='little')
 
-    self.np = self.np.to_bytes(4, byteorder='little')
-
-    self.tp = self.tp.to_bytes(4, byteorder='little')
-
-    self.TPayload = self.TPayload.to_bytes(6, byteorder='little')
-
-    head = self.id + tipo + self.np + self.tp + self.TPayload
-    head = self.id + tipo + self.np + self.tp + self.TPayload
+    head = id1 + tipo + self.np + self.tp + self.TPayload
 
     msg6 = head + payload + self.EoP
 
     self.msg = msg6
 
-  def addPayload():
+  def addPayload(self):
 
     payload = self.corpo[:128]
     
@@ -216,49 +199,29 @@ class Server(object):
       payload = payload.replace(self.dataStuff, self.EoP)
 
     self.Payload += payload
-    print("+++++++++++++a img esta vino++++++++++++++++")
+
+    print("+++++++++++++++a img esta vino+++++++++++++++")
 
   def savePackage(self,head):
     #salvando informacoes do head
 
 
-    self.tp = head[2:6]
-  
-    self.tp = int.from_bytes(self.tp,byteorder = "little")
-
-    self.np = head[6:10]
-
-    self.np = int.from_bytes(self.np,byteorder = "little")
+    self.np = head[2:6]
+    
+    self.tp = head[6:10]
 
     self.TPayload = head[10:]
 
-    self.TPayload = int.from_bytes(self.TPayload,byteorder = "little")
-
     self.com.getData(132)
 
-    print("+++++++++++++++pacote inicial salvo++++++++++")
+    print("+++++++++++++++pacote inicial salvo+++++++++++++++")
 
   def save(self):
+    
     open(self.nomeArquivo, "wb").write(self.Payload)
 
   def finish(self):
-      print("++++++++++TERMINOU++++++")
+
+      print("+++++++++++++++TERMINOU+++++++++++++++")
       self.com.rx.clearBuffer()
       self.com.disable()
-
-
-
-#     # Faz a recepção dos dados
-
-#     open(self.nomeArquivo, "wb").write(Payload)
-
-#     print("\n")
-#     print("- - - - - - - - - - - - - - - - -")
-#     print("Arquivo foi salvo no diretório com o nome de: {}".format(self.nomeArquivo))
-#     print("- - - - - - - - - - - - - - - - -")
-#     print("- - - - - - - - - - - - - - - - -")
-#     print("\n")
-#     print("-------------------------")
-#     print(" Comunicação encerrada  ")
-#     print("-------------------------")
-#     self.com.disable()
