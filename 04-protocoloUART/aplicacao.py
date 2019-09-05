@@ -80,7 +80,7 @@ def main():
   elif (platform == 2):
     print("- - - - - - - - - - - - - - - - - - - - - -")
     print("Deseja se conectar com qual servidor? (id do servidor)\n")
-    idServer = input("> ")
+    idServer = int(input("> "))
     idServer = idServer.to_bytes(1, byteorder='little')
     print("- - - - - - - - - - - - - - - - - - - - - -")
     print("Informe o nome do arquivo a ser enviado, junto")
