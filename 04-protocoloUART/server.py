@@ -34,7 +34,7 @@ class Server(object):
 
     self.com.rx.clearBuffer()
     self.com.enable()
-    print("+++++++++++++++iniciando server+++++++++++++++")
+    print("+++++++++++++++++++++++iniciando server++++++++++++++++++++++")
 
   def WaitInfo(self, noBytes): # noBytes = Number of Bytes
 
@@ -42,7 +42,8 @@ class Server(object):
     EoP = b"\xf0\xf1\xf2\xf3"
 
     while(self.ocioso):
-      print("+++++++++++++++Esperando comunicação+++++++++++++++")
+      print("+++++++++++++++++++++++Esperando comunicação+++++++++++++++++++++++")
+
 
       while (self.com.rx.getIsEmpty()):
         pass
@@ -72,7 +73,7 @@ class Server(object):
 
           self.cont=1
 
-          print("+++++++++++++++Mensagem confirmada para mim+++++++++++++++")
+          print("+++++++++++++++++++Mensagem confirmada para mim++++++++++++++++++++")
 
         else:
 
@@ -87,13 +88,15 @@ class Server(object):
 
   def receiveImg(self):
 
-    print("+++++++++++++++continuando comunicacao+++++++++++++++")
+    print("++++++++++++++++++++continuando comunicacao++++++++++++++++++++++++")
 
-    self.cont=int(1)
+    self.cont=int(0)
+
+    np = int(0)
 
     tp = int.from_bytes(self.tp,byteorder='little')
 
-    while (self.cont <= tp):
+    while (np <= tp):
 
 
       while (self.com.rx.getIsEmpty()):
@@ -102,6 +105,9 @@ class Server(object):
       atual, lenatual = self.com.getData(16)
       
       tipo = atual[1]
+
+      np = atual[2:6]
+      np = int.from_bytes(np,byteorder='little')
 
       self.corpo, lencorpo = self.com.getData(132)
 
@@ -117,7 +123,10 @@ class Server(object):
 
           self.com.sendData(self.msg)
 
+          print(" Download: " + str(np) + "/" + str(tp))
+
           self.cont+=1
+
 
         else:
 
@@ -126,7 +135,7 @@ class Server(object):
           self.com.sendData(self.msg)
 
       else:
-
+        print("aqui")
         time.sleep(1)
 
   def msg2(self):
@@ -147,12 +156,11 @@ class Server(object):
 
     self.msg = msg2
 
-    print("+++++++++++++++enviando msg 2+++++++++++++++")
-
+    print("+++++++++++++++++++++++++++enviando msg 2++++++++++++++++++++++++++")
 
   def msg4(self):
   
-  #Mensagem do tipo 2: Convida o servidor para iniciar a comunicação
+  #Mensagem do tipo 4: Confirmacao de recebmento
 
     tipo = 4
 
@@ -170,9 +178,13 @@ class Server(object):
 
     self.msg = msg4
 
+    print("+++++++++++++++++++++++++++enviando msg 4++++++++++++++++++++++++++")
+
+
+
   def msg6(self):
   
-  #Mensagem do tipo 2: Convida o servidor para iniciar a comunicação
+  #Mensagem do tipo 6: ERRO INESPERADO
 
     tipo = 6
     tipo = tipo.to_bytes(1, byteorder='little')
@@ -188,6 +200,9 @@ class Server(object):
 
     self.msg = msg6
 
+    print("+++++++++++++++++++++++++++enviando msg 6++++++++++++++++++++++++++")
+
+
   def addPayload(self):
 
     payload = self.corpo[:128]
@@ -200,7 +215,7 @@ class Server(object):
 
     self.Payload += payload
 
-    print("+++++++++++++++a img esta vino+++++++++++++++")
+    print("+++++++++++++++++++++++  a img esta vino  +++++++++++++++++++++++++")
 
   def savePackage(self,head):
     #salvando informacoes do head
@@ -214,7 +229,7 @@ class Server(object):
 
     self.com.getData(132)
 
-    print("+++++++++++++++pacote inicial salvo+++++++++++++++")
+    print("+++++++++++++++++++++++ pacote inicial salvo ++++++++++++++++++++++")
 
   def save(self):
     
@@ -222,6 +237,6 @@ class Server(object):
 
   def finish(self):
 
-      print("+++++++++++++++TERMINOU+++++++++++++++")
+      print("++++++++++++++++++++++++++TERMINOU++++++++++++++++++++++++++++")
       self.com.rx.clearBuffer()
       self.com.disable()
