@@ -94,15 +94,16 @@ class Client(object):
     Inicia a enviar mensagens do tipo 3 com a imagem no payload
     """
     self.stuffData()
-    self.actualPackage = 0
+    self.actualPackage = 1
     NoP = int.from_bytes(self.NoP, byteorder='little')
     print('\n')
     while (self.actualPackage <= NoP):
       self.msg3()
-      package = self.constructPack(self.actualPackage, self.msg)
+      if (self.actualPackage == NoP):
+        package = self.constructPack(self.actualPackage, self.msg, lastPack=True)
+      else:
+        package = self.constructPack(self.actualPackage, self.msg)
       self.sendMsg(package)
-      print(f'Enviando pacote {self.actualPackage}')
-      print(f'Total de pacotes {NoP}')
       answerHead, answerLen = self.waitForAnswer(16)
       ansType = self.msgType(answerHead)
       if (ansType == 4):
@@ -167,7 +168,7 @@ class Client(object):
     head = idServer + tipoMsg + actualPack + NoP + sizeOfPackage
     return head
 
-  def constructPack(self, actualPack, tipoMsg):
+  def constructPack(self, actualPack, tipoMsg, lastPack = False):
     """
     Constrói cada pacote.
     Head -> 16 bytes
@@ -176,10 +177,19 @@ class Client(object):
     ---------------------
     Total -> 148 bytes
     """
-    head = self.constructHead(actualPack, tipoMsg)
-    bufferSlice = self.txBuffer[self.byteSlice:self.byteSlice+128]
-    EoP = b'\xf0\xf1\xf2\xf3' # End of Package
-    package = head + bufferSlice + EoP
+    if(lastPack == False):
+      head = self.constructHead(actualPack, tipoMsg)
+      bufferSlice = self.txBuffer[self.byteSlice:self.byteSlice+128]
+      EoP = b'\xf0\xf1\xf2\xf3' # End of Package
+      package = head + bufferSlice + EoP
+    else:
+      head = self.constructHead(actualPack, tipoMsg)
+      bufferSlice = self.txBuffer[self.byteSlice:]
+      if (len(bufferSlice) < 128):
+        missingInfo = 128-(self.txLen%128)
+        bufferSlice += (b'\xf0')*missingInfo
+      EoP = b'\xf0\xf1\xf2\xf3' # End of Package
+      package = head + bufferSlice + EoP
     return package
 
   def stuffData(self):
@@ -219,7 +229,7 @@ class Client(object):
     """
     Encerra comunicação
     """
-    print("\n-------------------------")
-    print("  Comunicação encerrada")
-    print("-------------------------")
+    print("\n--------------------------------------")
+    print("         Comunicação encerrada          ")
+    print("----------------------------------------")
     self.com.disable()
