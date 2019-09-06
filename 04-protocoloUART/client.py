@@ -40,12 +40,13 @@ class Client(object):
     Inicia a comunicação com o servidor em questão
     """
     pack0 = self.constructPack(self.actualPackage, self.msg)
-    #stringBusca = 'Buscando servidor...'
+    stringBusca = 'Buscando servidor'
+    stringPonto = ""
     while (self.inicia == False):
       self.sendMsg(pack0)
       time.sleep(2)
-      # stringBusca += stringBusca + str(' . ')
-      #print(stringBusca)
+      print(stringBusca + stringPonto + '\r', end='\r')
+      stringPonto += "."
       if (self.com.rx.getIsEmpty() == False):
         headAtual, lenHeadAtual = self.com.getData(16)
         if(self.msgType(headAtual) == 2):
@@ -93,17 +94,19 @@ class Client(object):
     Inicia a enviar mensagens do tipo 3 com a imagem no payload
     """
     self.stuffData()
-    self.actualPackage = 1
-    self.NoP = int.from_bytes(self.NoP, byteorder='little')
+    self.actualPackage = 0
+    NoP = int.from_bytes(self.NoP, byteorder='little')
     print('\n')
-    while (self.actualPackage <= self.NoP):
+    while (self.actualPackage <= NoP):
       self.msg3()
       package = self.constructPack(self.actualPackage, self.msg)
       self.sendMsg(package)
+      print(f'Enviando pacote {self.actualPackage}')
+      print(f'Total de pacotes {NoP}')
       answerHead, answerLen = self.waitForAnswer(16)
       ansType = self.msgType(answerHead)
       if (ansType == 4):
-        toConclude = round((self.actualPackage/self.NoP)*100,1)
+        toConclude = round((self.actualPackage/NoP)*100,1)
         print(f'Enviando pacotes................{toConclude}%\r', end='\r')
         self.increment()
         continue
