@@ -276,26 +276,31 @@ class Client(object):
 
   def createLog(self, tempo, vel, minutes):
     NoP = int.from_bytes(self.NoP, byteorder='little')
+    idServer = int.from_bytes(self.actualServer, byteorder='little')
     print("- - - - - - - - - - - - - - - - -")
-    print("Criando Log da transferência")
-    print("- - - - - - - - - - - - - - - - -")
-    f = open(str("log")+self.nomeArquivo+str('.txt'), 'w')
+    print("\nCriando Log da transferência")
+    print("\n- - - - - - - - - - - - - - - - -")
+    ponto = self.nomeArquivo.find(".")
+    nome = self.nomeArquivo[:ponto]
+    f = open(str("log") + nome + str('.txt'), 'w')
     f.write("LOG DA TRANSFERENCIA DO ARQUIVO: " + self.nomeArquivo)
-    f.write("-------------------------------------------------")
-    f.write("Comunicando com o servidor: " + str(self.actualServer))
-    f.write("Número de total de pacotes: " + str(NoP))
-    f.write("Tamanho total da imagem: " + str(self.txLen))
-    f.write("Tempo de transferência: " + str(tempo))
-    f.write("Velocidade de transferência: " + str(vel))
-    f.write("Tempo em minutos de transferência: " + str(minutes))
-    f.write("-------------------------------------------------")
-    f.write("Pacotes OK:")
-    for o in self.okList.keys():
-      f.write("No pacote " + str(o) + ": Resposta do tipo " + str(self.okList[o]))
-    f.write("-------------------------------------------------")
-    f.write("Erro nos pacotes:")
+    f.write("\n-------------------------------------------------")
+    f.write("\nComunicando com o servidor: " + str(idServer))
+    f.write("\nNúmero de total de pacotes: " + str(NoP))
+    f.write("\nTamanho total da imagem: " + str(self.txLen))
+    f.write("\nTempo de transferência: " + str(tempo) + " segundos")
+    f.write("\nVelocidade de transferência: " + str(vel) + " bytes/segundo")
+    f.write("\nTempo em minutos de transferência: " + str(minutes))
+    f.write("\n-------------------------------------------------")
+    f.write("\nPacotes OK:")
+    for o in self.okPack.keys():
+      f.write("\nNo pacote " + str(o) + ": Resposta do tipo " + str(self.okPack[o]))
+    f.write("\n-------------------------------------------------")
+    if (len(self.errorList) > 0):
+      f.write("\nErro nos pacotes:")
     for e in self.errorList.keys():
-      f.write("No pacote " + str(e) + ": Resposta do tipo " + str(self.errorList[e]))
+      f.write("\nNo pacote " + str(e) + ": Resposta do tipo " + str(self.errorList[e]))
+    f.write("\n---------FIM DO LOG-----------")
     f.close()
     
   def stopCom(self):
