@@ -94,7 +94,6 @@ def main():
 def clientInit(serialName, nomeArquivo, idServer):
   cli = Client(serialName, nomeArquivo, idServer)
   cli.start()
-  cli.msg1()
   print('\nTentando comunicação com o servidor')
   cli.startCom(idServer)
   print('\n----------------------------------------')
@@ -115,6 +114,7 @@ def clientInit(serialName, nomeArquivo, idServer):
   print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
   print("Velocidade da transmissão......................{} bytes/s".format(vel))
   print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
+  cli.createLog(tempo, vel, minutes)
   cli.stopCom()
 
 def serverInit(serialName, nomeArquivo):

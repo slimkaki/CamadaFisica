@@ -27,6 +27,8 @@ class Client(object):
     self.byteSlice = 0 # corte do pacote
     self.inicia = False
     self.actualServer = actualServer # id do server atualmente em comunicação
+    self.okPack = {}
+    self.errorList = {}
 
   def start(self):
     """
@@ -39,12 +41,20 @@ class Client(object):
     """
     Inicia a comunicação com o servidor em questão
     """
+    self.msg1()
     pack0 = self.constructPack(self.actualPackage, self.msg)
     stringBusca = 'Buscando servidor'
     stringPonto = ""
+    t0 = time.time()
     while (self.inicia == False):
+      t1 = time.time()
+      if ((t1-t0) >= 20):
+        self.msg5()
+        timeOutMsg = self.constructPack(self.actualPackage, self.msg)
+        self.sendMsg(timeOutMsg)
+        break
       self.sendMsg(pack0)
-      time.sleep(2)
+      time.sleep(5)
       print(stringBusca + stringPonto + '\r', end='\r')
       stringPonto += "."
       if (self.com.rx.getIsEmpty() == False):
@@ -58,25 +68,34 @@ class Client(object):
     """
     idInformado = headAtual[0]
     actualServerId = int.from_bytes(self.actualServer, byteorder='little')
-    
+
+    pacoteAtualServer = headAtual[2:6]
+    pacoteAtualServer = int.from_bytes(pacoteAtualServer, byteorder='little')
+
     if (actualServerId == idInformado):
       tipoMsg = headAtual[1]
       #tipoMsg = int.from_bytes(tipoMsg, byteorder='little')
       if (tipoMsg == 2):
         # Mensagem do tipo 2: Comunicação client-server estabelecida
+        self.okPack[str(self.actualPackage)] = 2
         self.com.getData(132) # Removendo os 132 bytes do pacote que ainda estão no RxBuffer
         return 2
       elif (tipoMsg == 4):
         # Mensagem do tipo 4: Confirmação do recebimento da mensagem tipo 3 pelo server
+        self.okPack[str(self.actualPackage)] = 4
+        if (pacoteAtualServer != self.actualPackage):
+          self.decrement()
         self.com.getData(132)
         return 4
       elif (tipoMsg == 5):
         # Mensagem do tipo 5: Time-out
+        self.errorList[str(self.actualPackage)] = 5
         self.com.getData(132)
         self.stopCom()
         return 5
       elif (tipoMsg == 6):
         # Mensagem do tipo 6: Mensagem do tipo 3 inválida
+        self.errorList[str(self.actualPackage)] = 6
         actualPackage = headAtual[2:6]
         self.actualPackage = int.from_bytes(actualPackage, byteorder='little')
         self.com.getData(132)
@@ -104,23 +123,30 @@ class Client(object):
       else:
         package = self.constructPack(self.actualPackage, self.msg)
       self.sendMsg(package)
-      answerHead, answerLen = self.waitForAnswer(16)
+      answerHead, answerLen = self.waitForAnswer(16, package)
       ansType = self.msgType(answerHead)
       if (ansType == 4):
-        toConclude = round((self.actualPackage/NoP)*100,1)
-        print(f'Enviando pacotes................{toConclude}%\r', end='\r')
+        self.toConcludePrint(NoP)
         self.increment()
         continue
       elif(ansType == 5):
         break
       elif (ansType == 6):
         continue
+
+  def toConcludePrint(self, NoP):
+    toConclude = round((self.actualPackage/NoP)*100,1)
+    print(f'Enviando pacotes................{toConclude}%\r', end='\r')
       
   def sendMsg(self, msgToBeSent):
     """
     Argumento msgToBeSent é igual ao pacote a ser enviado (message to be sent)
     """
     self.com.sendData(msgToBeSent)
+
+  def decrement(self):
+    self.actualPackage -= 1 # próximo pacote
+    self.byteSlice -= 128 # 128 bytes
 
   def increment(self):
     """
@@ -129,34 +155,57 @@ class Client(object):
     self.actualPackage += 1 # próximo pacote
     self.byteSlice += 128 # 128 bytes
 
-  def waitForAnswer(self, noBytes): # noBytes = Number of Bytes (Integer)
+  def waitForAnswer(self, noBytes, package): # noBytes = Number of Bytes (Integer)
     """
     Aguarda por uma resposta do servidor
     """
     t0 = time.time()
     while (self.com.rx.getIsEmpty()):
+      time.sleep(1)
       t1 = time.time()
-      if ((t1-t0) >= 60):
-        self.msg5()
-        package = self.constructPack(self.actualPackage, self.msg)
+      timedOut = self.checkIfTimeOut(t0, t1)
+      disconnect = self.checkDisconnect(t0, t1)
+      if(disconnect):
+        print(f'Re-enviando pacote {self.actualPackage}')
         self.sendMsg(package)
-        print("Erro: Time Out. Sem resposta do server.")
+      if(timedOut):
+        self.timeOut()
         break
       else:
         pass
     pack, lenOfPack = self.com.getData(noBytes)
     return (pack, lenOfPack)
 
+  def checkDisconnect(self, t0, t1):
+    elapsedTime = t1-t0
+    if(elapsedTime%5 == 0):
+      return True
+    else:
+      return False
+
+  def checkIfTimeOut(self, t0, t1):
+    elapsedTime = t1-t0
+    if(elapsedTime >= 20):
+      return True
+    else:
+      return False
+
+  def timeOut(self):
+    self.msg5()
+    package = self.constructPack(self.actualPackage, self.msg)
+    self.sendMsg(package)
+
+
   def constructHead(self, actualPack, tipoMsg):
     """
     Constrói o head de cada pacote. (16 bytes)
     idServer = integer
     ----------------------------
-    ID do Servidor -> 1 byte
-    Tipo de mensagem -> 1 byte
-    Pacote atual -> 4 bytes
-    Total de pacotes -> 4 bytes
-    Tamanho total -> 6 bytes 
+    ID do Servidor -> 1 byte [0]
+    Tipo de mensagem -> 1 byte [1]
+    Pacote atual -> 4 bytes [2:6]
+    Total de pacotes -> 4 bytes [6:10]
+    Tamanho total -> 6 bytes [10:16]
     ----------------------------
     """
     idServer = self.actualServer
@@ -224,12 +273,36 @@ class Client(object):
     msg5 = 5
     msg5 = msg5.to_bytes(1, byteorder='little')
     self.msg = msg5
+
+  def createLog(self, tempo, vel, minutes):
+    NoP = int.from_bytes(self.NoP, byteorder='little')
+    print("- - - - - - - - - - - - - - - - -")
+    print("Criando Log da transferência")
+    print("- - - - - - - - - - - - - - - - -")
+    f = open(str("log")+self.nomeArquivo+str('.txt'), 'w')
+    f.write("LOG DA TRANSFERENCIA DO ARQUIVO: " + self.nomeArquivo)
+    f.write("-------------------------------------------------")
+    f.write("Comunicando com o servidor: " + str(self.actualServer))
+    f.write("Número de total de pacotes: " + str(NoP))
+    f.write("Tamanho total da imagem: " + str(self.txLen))
+    f.write("Tempo de transferência: " + str(tempo))
+    f.write("Velocidade de transferência: " + str(vel))
+    f.write("Tempo em minutos de transferência: " + str(minutes))
+    f.write("-------------------------------------------------")
+    f.write("Pacotes OK:")
+    for o in self.okList.keys():
+      f.write("No pacote " + str(o) + ": Resposta do tipo " + str(self.okList[o]))
+    f.write("-------------------------------------------------")
+    f.write("Erro nos pacotes:")
+    for e in self.errorList.keys():
+      f.write("No pacote " + str(e) + ": Resposta do tipo " + str(self.errorList[e]))
+    f.close()
     
   def stopCom(self):
     """
     Encerra comunicação
     """
-    print("\n--------------------------------------")
+    print("\n----------------------------------------")
     print("         Comunicação encerrada          ")
     print("----------------------------------------")
     self.com.disable()
