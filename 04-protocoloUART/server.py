@@ -30,14 +30,15 @@ class Server(object):
     self.Payload=b""
     self.dataStuff=b'\xf0\xf0\xf0\xf0'
     self.resto = 0
-
-
-
+    self.t0=0
+    self.t1=0
+    self.tipo=0
+    self.find=0
   def start(self):
 
     self.com.rx.clearBuffer()
     self.com.enable()
-    print("+++++++++++++++++++++++iniciando server++++++++++++++++++++++")
+    print("Initializing Server")
 
 
 
@@ -47,13 +48,13 @@ class Server(object):
     EoP = b"\xf0\xf1\xf2\xf3"
 
     while(self.ocioso):
-      print("+++++++++++++++++++++++Esperando comunicação+++++++++++++++++++++++")
 
+      print("Waiting Communication")
 
-      while (self.com.rx.getIsEmpty()):
-        pass
+      self.tiempo()
+      
+      print("Communication attempt identified")
 
-      print("+++++++++++++++tentativa de comunicação identificada+++++++++++++++")
       head, head_size = self.com.getData(noBytes)
       
       cliente_id = head[0]
@@ -61,7 +62,6 @@ class Server(object):
       Tipo = head[1]
 
       msg1 = 1
-
       #recebeu t1
       if Tipo == msg1:
 
@@ -72,20 +72,20 @@ class Server(object):
 
           self.savePackage(head)
 
-          self.msg2()
+          self.MsgBiuld(2)
 
           self.com.sendData(self.msg)
 
           self.cont=1
 
-          print("+++++++++++++++++++Mensagem confirmada para mim++++++++++++++++++++")
+          print("Auth verified")
 
         else:
-
+          #print("ow")
           time.sleep(1)
 
       else:
-
+        #print("ola")
         time.sleep(1)
 
       pass
@@ -93,44 +93,25 @@ class Server(object):
 
   def receiveImg(self):
 
-    print("++++++++++++++++++++continuando comunicacao++++++++++++++++++++++++")
+    print("Initializing Data Transfer")
 
-    self.cont=int(1)
-
-    np = int(0)
+    self.cont= int(1)
 
     tp = int.from_bytes(self.tp,byteorder='little')
 
+
     while (self.cont <= tp):
 
+      self.tiempo()
+      self.saveP()
+      #print(self.np)
+      if (self.tipo == 3):
 
-      while (self.com.rx.getIsEmpty()):
-        pass
-
-      atual, lenatual = self.com.getData(16)
-      
-      tipo = atual[1]
-
-      TamPack = atual[10:]
-      TamPack = int.from_bytes(TamPack,byteorder='little')
-
-      self.resto = TamPack % 128
-
-      np = atual[2:6]
-
-      np = int.from_bytes(np,byteorder='little')
-
-      self.corpo, lencorpo = self.com.getData(132)
-
-      find = self.corpo.find(self.EoP)
-
-      if (tipo == 3):
-
-        if (find>0):
-          self.msg4()
+        if (self.find>0):
+          self.MsgBiuld(4)
           if (self.cont == tp):
 
-            print(" LASTPACK: " + str(self.cont) + "/" + str(tp))
+            print("LastPack: " + str(self.cont) + "/" + str(tp))
             self.addPayload(boolean = True)
             self.com.sendData(self.msg)
 
@@ -139,90 +120,39 @@ class Server(object):
             self.addPayload()
             self.com.sendData(self.msg)
 
-          print(" Download: " + str(self.cont) + "/" + str(tp))
+          toConclude = round((self.cont/tp)*100,1)
+          print(f'Enviando pacotes................{toConclude}%\r', end='\r')
 
           self.cont+=1
 
         else:
 
-          self.msg6()
+          self.MsgBiuld(6)
 
           self.com.sendData(self.msg)
           
       else:
-        print("aqui")
+        #print("oi")
         time.sleep(1)
 
 
 
-  def msg2(self):
-  
+  def MsgBiuld(self,tipo):
   #Mensagem do tipo 2: Convida o servidor para iniciar a comunicação
 
-    tipo = 2
     tipo = tipo.to_bytes(1, byteorder='little')
 
     payload = 0
     payload = payload.to_bytes(128,byteorder = "little")
 
     id1 = self.id.to_bytes(1, byteorder='little')
-
+    #print("Numero atual do pack ENVIADO: "+ str(int.from_bytes(self.np,byteorder='little')))
     head = id1 + tipo + self.np + self.tp + self.TPayload
 
-    msg2 = head + payload + self.EoP
-
-    self.msg = msg2
-
-    print("+++++++++++++++++++++++++++enviando msg 2++++++++++++++++++++++++++")
-
-
-
-  def msg4(self):
-  
-  #Mensagem do tipo 4: Confirmacao de recebmento
-
-    tipo = 4
-
-    tipo = tipo.to_bytes(1, byteorder='little')
-
-    payload = 0
-
-    payload = payload.to_bytes(128,byteorder = "little")
-    
-    id1 = self.id.to_bytes(1, byteorder='little')
-
-    head = id1 + tipo + self.np + self.tp + self.TPayload
-
-    msg4 = head + payload + self.EoP
-
-    self.msg = msg4
-
-    print("+++++++++++++++++++++++++++enviando msg 4++++++++++++++++++++++++++")
-
-
-
-
-  def msg6(self):
-  
-  #Mensagem do tipo 6: ERRO INESPERADO
-
-    tipo = 6
-    tipo = tipo.to_bytes(1, byteorder='little')
-
-    payload = 0
-    payload = payload.to_bytes(128,byteorder = "little")
-
-    id1 = self.id.to_bytes(1, byteorder='little')
-
-    head = id1 + tipo + self.np + self.tp + self.TPayload
-
-    msg6 = head + payload + self.EoP
-
-    self.msg = msg6
-
-    print("+++++++++++++++++++++++++++enviando msg 6++++++++++++++++++++++++++")
-
-
+    msg = head + payload + self.EoP
+    #if(self.tipo==3):
+      #print(int.from_bytes(self.np,byteorder='little'))
+    self.msg = msg
 
 
   def addPayload(self, boolean = False):
@@ -244,21 +174,15 @@ class Server(object):
 
       if boolean:
 
-        print("ELE CHEGO O ULTIMO PACOTE ESTA SENDO SALVO")
         payload = payload[:self.resto]
 
     else:
-      self.msg6()
+
+      self.MsgBiuld(6)
       self.com.sendData(self.msg)
     
 
     self.Payload += payload
-
-    print('PAYLOADLEN '+str(len(self.Payload)))
-
-    print("+++++++++++++++++++++++  a img esta vino  +++++++++++++++++++++++++")
-
-
 
 
   def savePackage(self,head):
@@ -272,21 +196,66 @@ class Server(object):
 
     self.com.getData(132)
 
-    print("+++++++++++++++++++++++ pacote inicial salvo ++++++++++++++++++++++")
+  def tiempo(self):
 
+      self.t0 = time.time()
 
+      while (self.com.rx.getIsEmpty()):
+        
+        self.t1 = time.time()
+        self.Disconected()
 
+        if ((self.t1-self.t0)>=60):
+
+          self.MsgBiuld(5)
+
+          self.com.sendData(self.msg)
+
+          erro, lenerro = self.com.getData(16)
+          Tipo = erro[1]
+          msg5 = 5
+          self.savePackage(erro)
+
+          if Tipo == msg5:
+
+            print("Communication Error")
+
+            self.finish()
+        else:
+          pass
+
+  def Disconected(self):
+
+    elapsedTime = self.t1-self.t0
+    if(elapsedTime %5 == 0):
+      self.com.sendData(self.msg)
+      print("Remandando msg5")
+
+  def saveP(self):
+
+      atual, lenatual = self.com.getData(16)
+      
+      self.tipo = atual[1]
+      self.np = atual[2:6]
+      #print("Numero atual do pack"+str(int.from_bytes(self.np,byteorder='little')))
+      TamPack = atual[10:]
+      TamPack = int.from_bytes(TamPack,byteorder='little')
+
+      self.resto = TamPack % 128
+
+      self.corpo, lencorpo = self.com.getData(132)
+
+      self.find = self.corpo.find(self.EoP)
 
   def save(self):
 
-    print('imagem salva no nome {0}'.format(self.nomeArquivo))
+    print('Image save as: {0}'.format(self.nomeArquivo))
     open(self.nomeArquivo, "wb").write(self.Payload)
-
 
 
   def finish(self):
 
-      print("++++++++++++++++++++++++++TERMINOU++++++++++++++++++++++++++++")
+      print("End of Communication")
       self.com.rx.clearBuffer()
       self.com.disable()
 
