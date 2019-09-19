@@ -41,3 +41,10 @@
 
     - para rodar: python aplicacao.py
           ou no Ubuntu: sudo python3 aplicacao.py
+
+### 05 - CRC - Cyclic Redundancy Check
+
+    Objetivo de checar cada pacote e verificar se todos os bits foram enviados corretamente
+
+    - para rodar: python aplicacao.py
+          ou no Ubuntu: sudo python3 aplicacao.py
