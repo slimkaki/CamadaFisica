@@ -123,6 +123,7 @@ def serverInit(serialName, nomeArquivo):
   serv.WaitInfo(16)
   serv.receiveImg()
   serv.save()
+  serv.createLog()
   serv.finish()
 def getOS():
   OS = {'linux': 'Linux',

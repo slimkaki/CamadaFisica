@@ -34,6 +34,8 @@ class Server(object):
     self.t1=0
     self.tipo=0
     self.find=0
+    self.okList={}
+    self.errorList={}
   def start(self):
 
     self.com.rx.clearBuffer()
@@ -60,6 +62,17 @@ class Server(object):
       cliente_id = head[0]
 
       Tipo = head[1]
+
+      if Tipo == (1 or 3):
+        if Tipo == 1:
+          self.okList[str(self.np)] = 1
+        else:
+          self.okList[str(self.np)] = 3
+      else:
+        if Tipo==5:
+          self.okList[str(self.np)] = 5
+        else:
+          self.okList[str(self.np)] = 6
 
       msg1 = 1
       #recebeu t1
@@ -240,7 +253,17 @@ class Server(object):
       #print("Numero atual do pack"+str(int.from_bytes(self.np,byteorder='little')))
       TamPack = atual[10:]
       TamPack = int.from_bytes(TamPack,byteorder='little')
-
+      if self.tipo == (1 or 3):
+        if self.tipo == 1:
+          self.okList[str(self.np)] = 1
+        else:
+          self.okList[str(self.np)] = 3
+      else:
+        if self.tipo==5:
+          self.okList[str(self.np)] = 5
+        else:
+          self.okList[str(self.np)] = 6
+          
       self.resto = TamPack % 128
 
       self.corpo, lencorpo = self.com.getData(132)
@@ -259,3 +282,23 @@ class Server(object):
       self.com.rx.clearBuffer()
       self.com.disable()
 
+  def createLog(self):
+    NoP = int.from_bytes(self.tp, byteorder='little')
+    print("- - - - - - - - - - - - - - - - -")
+    print("Criando Log da transferência")
+    print("- - - - - - - - - - - - - - - - -")
+    f = open(str("log")+self.nomeArquivo+str('.txt'), 'w')
+    f.write("LOG DA TRANSFERENCIA DO ARQUIVO: " + self.nomeArquivo)
+    f.write("-------------------------------------------------")
+    f.write("Comunicando com o servidor: " + str(self.id))
+    f.write("Número de total de pacotes: " + str(NoP))
+    f.write("Tamanho total da imagem: " + str(self.TPayload))
+    f.write("-------------------------------------------------")
+    f.write("Pacotes OK:")
+    for o in self.okList.keys():
+      f.write("No pacote " + str(o) + ": Resposta do tipo " + str(self.okList[o]))
+    f.write("-------------------------------------------------")
+    f.write("Erro nos pacotes:")
+    for e in self.errorList.keys():
+      f.write("No pacote " + str(e) + ": Resposta do tipo " + str(self.errorList[e]))
+    f.close()
