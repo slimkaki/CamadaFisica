@@ -48,3 +48,8 @@
 
     - para rodar: python aplicacao.py
           ou no Ubuntu: sudo python3 aplicacao.py
+
+### 06 - Serialização
+
+    O objetivo deste projeto é analisar e entender o protocolo UART de comunicação dos arduinos, descendo uma camada de abstração do projeto até então.
+    Agora estaremos analisando o hardware em si
