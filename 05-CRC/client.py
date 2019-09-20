@@ -6,12 +6,14 @@
 #Carareto
 #17/02/2018
 #  Aplicação 
+# Rafael Almada e Lucas Leal
 ####################################################
 
 from enlace import *
 import time
 import datetime as dt
 import math
+from PyCRC.CRC16 import CRC16
 
 class Client(object):
 
@@ -94,7 +96,8 @@ class Client(object):
         self.stopCom()
         return 5
       elif (tipoMsg == 6):
-        # Mensagem do tipo 6: Mensagem do tipo 3 inválida
+        # Mensagem do tipo 6: Mensagem do tipo 3 inválida ou erro no crc
+        # É necessário reenviar o último pacote enviado
         self.errorList[str(self.actualPackage)] = 6
         actualPackage = headAtual[2:6]
         self.actualPackage = int.from_bytes(actualPackage, byteorder='little')
@@ -196,7 +199,7 @@ class Client(object):
     self.sendMsg(package)
 
 
-  def constructHead(self, actualPack, tipoMsg):
+  def constructHead(self, actualPack, tipoMsg, payload = b'',lastPack = False):
     """
     Constrói o head de cada pacote. (16 bytes)
     idServer = integer
@@ -205,16 +208,31 @@ class Client(object):
     Tipo de mensagem -> 1 byte [1]
     Pacote atual -> 4 bytes [2:6]
     Total de pacotes -> 4 bytes [6:10]
-    Tamanho total -> 6 bytes [10:16]
+    Tamanho total -> 4 bytes [10:14]
+    CRC -> 2 bytes [14:16]
     ----------------------------
     """
-    idServer = self.actualServer
-    NoP = math.ceil(self.txLen/128) # Number of Packages (Total de pacotes)
-    NoP = NoP.to_bytes(4, byteorder='little')
-    self.NoP = NoP
-    actualPack = actualPack.to_bytes(4, byteorder='little') # Pacote atual
-    sizeOfPackage = self.txLen.to_bytes(6, byteorder='little')
-    head = idServer + tipoMsg + actualPack + NoP + sizeOfPackage
+    if (lastPack == False):
+      idServer = self.actualServer
+      NoP = math.ceil(self.txLen/128) # Number of Packages (Total de pacotes)
+      NoP = NoP.to_bytes(4, byteorder='little')
+      self.NoP = NoP
+      actualPack = actualPack.to_bytes(4, byteorder='little') # Pacote atual
+      sizeOfPackage = self.txLen.to_bytes(4, byteorder='little')
+      crcValue = self.getCRCValue()
+      crc = crcValue.to_bytes(2, byteorder='little')
+      head = idServer + tipoMsg + actualPack + NoP + sizeOfPackage + crc
+
+    else:
+      idServer = self.actualServer
+      NoP = math.ceil(self.txLen/128) # Number of Packages (Total de pacotes)
+      NoP = NoP.to_bytes(4, byteorder='little')
+      self.NoP = NoP
+      actualPack = actualPack.to_bytes(4, byteorder='little') # Pacote atual
+      sizeOfPackage = self.txLen.to_bytes(4, byteorder='little')
+      crcValue = self.getCRCValue(payload, lastPack)
+      crc = crcValue.to_bytes(2, byteorder='little')
+      head = idServer + tipoMsg + actualPack + NoP + sizeOfPackage + crc
     return head
 
   def constructPack(self, actualPack, tipoMsg, lastPack = False):
@@ -232,14 +250,23 @@ class Client(object):
       EoP = b'\xf0\xf1\xf2\xf3' # End of Package
       package = head + bufferSlice + EoP
     else:
-      head = self.constructHead(actualPack, tipoMsg)
       bufferSlice = self.txBuffer[self.byteSlice:]
       if (len(bufferSlice) < 128):
         missingInfo = 128-(self.txLen%128)
         bufferSlice += (b'\xf0')*missingInfo
       EoP = b'\xf0\xf1\xf2\xf3' # End of Package
+      head = self.constructHead(actualPack, tipoMsg, payload = bufferSlice, lastPack = True)
       package = head + bufferSlice + EoP
     return package
+
+  def getCRCValue(self, payload = b'',lastPack = False):
+    if (lastPack == False):
+      crcValue = CRC16().calculate(self.txBuffer[self.byteSlice:self.byteSlice+128])
+      # Forçando um erro para checar o funcionamento:
+      #crcValue = 39232
+    else:
+      crcValue = CRC16().calculate(payload)
+    return crcValue
 
   def stuffData(self):
     """
