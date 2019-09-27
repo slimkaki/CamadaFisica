@@ -1,6 +1,5 @@
 #include "sw_uart.h"
 #pragma GCC optimize ("-O3")
-
 void sw_uart_setup(due_sw_uart *uart, int rx, int tx, int stopbits, int databits, int paritybit) {
 	uart->pin_tx     = tx;
 	uart->pin_rx     = rx;
@@ -10,6 +9,7 @@ void sw_uart_setup(due_sw_uart *uart, int rx, int tx, int stopbits, int databits
   pinMode(rx, INPUT);
   pinMode(tx, OUTPUT);
   digitalWrite(tx, HIGH);
+  
 }
 
 void sw_uart_write_data(due_sw_uart *uart, char* bufferData, int writeN) {
@@ -116,13 +116,11 @@ void sw_uart_write_byte(due_sw_uart *uart, char data) {
 
 // MCK 21MHz
 void _sw_uart_wait_half_T(due_sw_uart *uart) {
-  for(int i = 0; i < 1093; i++)
-    asm("NOP");
+  for(int i = 0; i < 21000000/SW_UART_ABEL/2; i++)
+   asm("NOP");
 }
 
 void _sw_uart_wait_T(due_sw_uart *uart) {
   _sw_uart_wait_half_T(uart);
   _sw_uart_wait_half_T(uart);
 }
-
-

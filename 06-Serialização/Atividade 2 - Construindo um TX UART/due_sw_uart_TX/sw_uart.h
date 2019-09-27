@@ -9,7 +9,7 @@ struct due_sw_uart {
 	int baudrate;
 	int stopbits;
 	int paritybit;
-  	int databits;
+  int databits;
 };
 
 typedef struct due_sw_uart due_sw_uart;
@@ -20,7 +20,7 @@ typedef struct due_sw_uart due_sw_uart;
 #define SW_UART_NO_PARITY 		0
 #define SW_UART_ODD_PARITY 		1
 #define SW_UART_EVEN_PARITY 	2
-
+#define SW_UART_ABEL  9600
 
 void sw_uart_setup(due_sw_uart *uart, int rx, int tx, int stopbits, int databits, int paritybit);
 void sw_uart_write_data(due_sw_uart *uart, char* bufferData, int writeN);
@@ -32,4 +32,3 @@ void _sw_uart_wait_half_T(due_sw_uart *uart);
 void _sw_uart_wait_T(due_sw_uart *uart);
 
 #endif
-
