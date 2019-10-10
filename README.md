@@ -1,6 +1,8 @@
 # CamadaFisica
 
 ## Projetos
+____________________________________________________
+## Primeiro projeto
 
 ### 00 - Loop Back
 
@@ -53,3 +55,10 @@
 
     O objetivo deste projeto é analisar e entender o protocolo UART de comunicação dos arduinos, descendo uma camada de abstração do projeto até então.
     Agora estaremos analisando o hardware em si
+
+____________________________________________________
+## Segundo projeto:
+
+### 07 - DTMF
+
+    A partir de agora iremos trabalhar com transferência a partir de áudio. No contexto deste projeto, simularemos um telefone sendo discado, detectando com som os números sendo digitados pelo usuário no telefoone.
