@@ -42,6 +42,7 @@ class signalMeu(object):
         # print('passei do xf')
         yf = fft(signal*W)
         # print('passei do yf')
+        print(yf)
         return(xf, np.abs(yf[0:N//2]))
 
     def plotFFT(self, signal, fs):
@@ -49,3 +50,4 @@ class signalMeu(object):
         plt.figure()
         plt.plot(x, np.abs(y))
         plt.title('Fourier')
+        plt.show()

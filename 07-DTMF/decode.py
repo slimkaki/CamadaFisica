@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from scipy import signal as window
 import suaBibSignal as bibSignal
+import peakutils
 import time
 
 class Decode(object):
@@ -50,20 +51,30 @@ class Decode(object):
         print("Começando a gravar!")
         print("====================\n")
 
-        audio = sd.rec(int(self.duration*self.freqAmostra), self.freqAmostra, channels=1)
+        audio1 = sd.rec(int(self.duration*self.freqAmostra), self.freqAmostra, channels=1)
+        
+
         sd.wait()
+        audio = []
+        for sublist in audio1:
+            for item in sublist:
+                audio.append(item)
         print("")
         print("\n======================")
         print("Finalizando gravação!")
         print("======================\n")
-
+        #print(audio)
         t = np.linspace(0, self.duration, self.duration*self.freqAmostra)
-        print(f"t = {t}")
-        print(f'len(t) = {len(t)}')
+        #print(f"t = {t}")
+        #print(f'len(t) = {len(t)}')
         xf, yf = bib.calcFFT(audio, self.freqAmostra)
         # print(f'xf = {xf}')
         # print(f'yf = {yf}')
+        index = peakutils.indexes(yf, thres = 0.2, min_dist =100)
+        print(f"os indexes sao {xf[index[0]]},{xf[index[1]]}")
         bib.plotFFT(audio, self.freqAmostra)
+        
+        print(index)
         # plt.figure("F(y)")
         # plt.plot(xf,yf)
         # plt.grid()
@@ -132,7 +143,8 @@ def main():
     #voce deve tambem evitar que dois picos proximos sejam identificados, pois pequenas variacoes na
     #frequencia do sinal podem gerar mais de um pico, e na verdade tempos apenas 1.
    
-    #index = peakutils.indexes(,,)
+    
+
     
     #printe os picos encontrados! 
     
