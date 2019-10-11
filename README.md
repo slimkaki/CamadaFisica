@@ -59,6 +59,6 @@ ____________________________________________________
 ____________________________________________________
 ## Segundo projeto:
 
-### 07 - DTMF
+### 07 - DTMF (Dual Tone Multi Frequency)
 
     A partir de agora iremos trabalhar com transferência a partir de áudio. No contexto deste projeto, simularemos um telefone sendo discado, detectando com som os números sendo digitados pelo usuário no telefoone.
