@@ -72,6 +72,7 @@ class Encode(object):
         print("=====================================\n")
         sd.play(sine, self.freqAmostra)
         plt.plot(sine_freq1[0], sine)
+        plt.axis([0.165,0.190,-2,2])
         plt.show()
         sd.wait()
         

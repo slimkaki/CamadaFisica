@@ -68,15 +68,20 @@ class Decode(object):
         # plt.plot(xf,yf)
         # plt.grid()
         # plt.title('Fourier audio')
+    
+    def todB(s):
+        """
+        Converte intensidade em Db
+        """
+        sdB = 10*np.log10(s)
+        return(sdB)
 
 
 
 
 
 #funcao para transformas intensidade acustica em dB
-def todB(s):
-    sdB = 10*np.log10(s)
-    return(sdB)
+
 
 
 def main():
