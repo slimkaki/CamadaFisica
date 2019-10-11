@@ -61,4 +61,7 @@ ____________________________________________________
 
 ### 07 - DTMF (Dual Tone Multi Frequency)
 
-    A partir de agora iremos trabalhar com transferência a partir de áudio. No contexto deste projeto, simularemos um telefone sendo discado, detectando com som os números sendo digitados pelo usuário no telefoone.
+    A partir de agora iremos trabalhar com transferência a partir de áudio. No contexto deste projeto, simularemos um telefone sendo discado, detectando com som os números sendo digitados pelo usuário no telefone.
+
+    - para rodar: python aplicacao.py
+          ou no Ubuntu: python3 aplicacao.py
