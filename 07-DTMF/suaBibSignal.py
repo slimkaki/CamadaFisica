@@ -31,18 +31,11 @@ class signalMeu(object):
 
     def calcFFT(self, signal, fs):
         # https://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html
-        # print('entrei no calcFFT')
         N  = len(signal)
-        # print('passei do N')
         W = window.hamming(N)
-        # print('passei do W')
         T  = 1/fs
-        # print('passei do T')
         xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-        # print('passei do xf')
         yf = fft(signal*W)
-        # print('passei do yf')
-        print(yf)
         return(xf, np.abs(yf[0:N//2]))
 
     def plotFFT(self, signal, fs):
@@ -50,4 +43,5 @@ class signalMeu(object):
         plt.figure()
         plt.plot(x, np.abs(y))
         plt.title('Fourier')
-        plt.show()
+        plt.savefig('fourier.png')
+        #plt.show()

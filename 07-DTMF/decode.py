@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from scipy import signal as window
 import suaBibSignal as bibSignal
-import peakutils
-import time
+import peakutils, time, math, sys
 
 class Decode(object):
 
@@ -70,15 +69,33 @@ class Decode(object):
         xf, yf = bib.calcFFT(audio, self.freqAmostra)
         # print(f'xf = {xf}')
         # print(f'yf = {yf}')
-        index = peakutils.indexes(yf, thres = 0.2, min_dist =100)
-        print(f"os indexes sao {xf[index[0]]},{xf[index[1]]}")
+        indexes = peakutils.indexes(yf, thres = 0.2, min_dist =100)
+        linha = [697, 770, 852, 941]
+        coluna = [1209, 1336, 1477, 1633]
+        array = [['1', '2', '3', 'A'], ['4', '5', '6', 'B'], ['7', '8', '9', 'C'], ['X', '0', '#', 'D']]
+
+        pico1 = 0
+        pico2 = 0
+        for i in linha:
+            if (math.isclose(i, xf[indexes[0]], abs_tol = 10)):
+                pico1 = i 
+        for j in coluna:
+            if (math.isclose(j, xf[indexes[1]], abs_tol = 10)):
+                pico2 = j
+
+        l1 = linha.index(pico1)
+        c1 = coluna.index(pico2)
+        tecla = array[l1][c1]
+        print('\n---------------')
+        print(f'Pico 1 = {pico1} Hz\nPico 2 = {pico2} Hz')
+        print('---------------\n')
+        print('\n==========================')
+        print(f"Foi teclado a entrada: [{tecla}]")
+        print('==========================\n')
+
         bib.plotFFT(audio, self.freqAmostra)
-        
-        print(index)
-        # plt.figure("F(y)")
-        # plt.plot(xf,yf)
-        # plt.grid()
-        # plt.title('Fourier audio')
+
+        sys.exit()
     
     def todB(s):
         """
@@ -86,71 +103,3 @@ class Decode(object):
         """
         sdB = 10*np.log10(s)
         return(sdB)
-
-
-
-
-
-#funcao para transformas intensidade acustica em dB
-
-
-
-def main():
- 
-    #declare um objeto da classe da sua biblioteca de apoio (cedida)    
-    #declare uma variavel com a frequencia de amostragem, sendo 44100
-    
-    #voce importou a bilioteca sounddevice como, por exemplo, sd. entao
-    # os seguintes parametros devem ser setados:
-    
-    #sd.default.samplerate = #taxa de amostragem
-    sd.default.channels = 2  #voce pode ter que alterar isso dependendo da sua placa
-    #duration = #tempo em segundos que ira aquisitar o sinal acustico captado pelo mic
-
-
-    # faca um print na tela dizendo que a captacao comecará em n segundos. e entao 
-    #use um time.sleep para a espera
-   
-   #faca um print informando que a gravacao foi inicializada
-   
-   #declare uma variavel "duracao" com a duracao em segundos da gravacao. poucos segundos ... 
-   #calcule o numero de amostras "numAmostras" que serao feitas (numero de aquisicoes)
-   
-    audio = sd.rec(int(numAmostras), freqDeAmostragem, channels=1)
-    sd.wait()
-    print("...     FIM")
-    
-    #analise sua variavel "audio". pode ser um vetor com 1 ou 2 colunas, lista ...
-    #grave uma variavel com apenas a parte que interessa (dados)
-    
-
-    # use a funcao linspace e crie o vetor tempo. Um instante correspondente a cada amostra!
-    t = np.linspace(inicio,fim,numPontos)
-
-    # plot do gravico  áudio vs tempo!
-   
-    
-    ## Calcula e exibe o Fourier do sinal audio. como saida tem-se a amplitude e as frequencias
-    xf, yf = signal.calcFFT(y, fs)
-    plt.figure("F(y)")
-    plt.plot(xf,yf)
-    plt.grid()
-    plt.title('Fourier audio')
-    
-
-    #esta funcao analisa o fourier e encontra os picos
-    #voce deve aprender a usa-la. ha como ajustar a sensibilidade, ou seja, o que é um pico?
-    #voce deve tambem evitar que dois picos proximos sejam identificados, pois pequenas variacoes na
-    #frequencia do sinal podem gerar mais de um pico, e na verdade tempos apenas 1.
-   
-    
-
-    
-    #printe os picos encontrados! 
-    
-    #encontre na tabela duas frequencias proximas às frequencias de pico encontradas e descubra qual foi a tecla
-    #print a tecla.
-    
-  
-    ## Exibe gráficos
-    plt.show()

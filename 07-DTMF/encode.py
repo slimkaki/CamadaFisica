@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from scipy import signal as window
 import suaBibSignal as bibSignal
+import time, sys
 
 class Encode(object):
 
@@ -73,8 +74,11 @@ class Encode(object):
         sd.play(sine, self.freqAmostra)
         plt.plot(sine_freq1[0], sine)
         plt.axis([0.165,0.190,-2,2])
-        plt.show()
+        plt.savefig('sinewave.png')
+        #plt.show()
         sd.wait()
+
+        sys.exit()
         
 
     def todB(self, s):
