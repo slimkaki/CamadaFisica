@@ -65,3 +65,10 @@ ____________________________________________________
 
     - para rodar: python aplicacao.py
           ou no Ubuntu: python3 aplicacao.py
+
+### 08 - Modulação em AM (Amplitude Modulation)
+
+    Neste projeto iremos modular um sinal de áudio para AM no <i>encode.py</i> e ouvir o áudio e demodular o mesmo no <i>decode.py</i>, reproduzindo o sinal emitido.
+
+    - para rodar: python aplicacao.py
+        ou no Ubuntu: python3 aplicacao.py
