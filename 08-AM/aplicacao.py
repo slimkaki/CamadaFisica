@@ -50,14 +50,17 @@ def emissor():
     # inicializa emissor
     print("\nInicializando o emissor...\n")
     emitter = Encode()
-    emitter.discagem()
+    emitter.main('naruto.wav')
+    #emitter.discagem()
 
 
 def receptor():
     # inicializa receptor
     print("\nInicializando o receptor...\n")
-    receptor = Decode()
-    receptor.getSignal()
+    print('Insira aqui a duração da gravação do áudio:')
+    rec = int(input('> '))
+    receptor = Decode(rec)
+    receptor.main()
 
 
 def choiceEorR():

@@ -19,6 +19,8 @@ from scipy.fftpack import fft
 from scipy import signal as window
 import suaBibSignal as bibSignal
 import time, sys
+import soundfile as sf
+import filtroPassaBaixa as fpb
 
 class Encode(object):
 
@@ -27,9 +29,95 @@ class Encode(object):
         self.freq1 = 0
         self.freq2 = 0
         self.amplitude = 1 # amplitude da onda formada
-        self.duration = 2 # segundos
+        self.duration = 120 # segundos
         self.gainX  = 0.3
         self.gainY  = 0.3
+
+    def main(self, sound):
+        sound, samplerate = sf.read(sound)
+        lista = self.getSoundWaveList(sound)
+        pb = self.normalize(lista)
+        S = self.moduleAM(pb)
+        b = bibSignal.signalMeu()
+        #plt.show()
+
+        print("\nO áudio modulado tocará em 5 segundos")
+        t0 = time.time()
+        t1 = time.time()
+        while (t1-t0 < 5):
+            print(str(round(5-(t1-t0))) + str(" segundo(s)\r"), end='\r')
+            t1 = time.time()
+            time.sleep(1)
+        print("")
+        print("\n========================")
+        print("Iniciando a tocar o áudio!")
+        print("========================\n")
+
+        sd.play(S, 14000)
+        sd.wait()
+
+        print("")
+        print("\n====================")
+        print("     Fim do áudio!    ")
+        print("====================\n")
+
+        print("+++++++++++++++++++++++++++")
+        print("Gráficos salvos em:        ")
+        print("./modulacao-sinal-audio.png")
+        print("./fourier.png              ")
+        print("+++++++++++++++++++++++++++")
+
+        b.plotFFT(S, self.freqAmostra, 'fourier-encode.png')
+        plt.figure(num=None, figsize=(14, 14), dpi=80, facecolor='w', edgecolor='k')
+        plt.subplot(3,1,1)
+        self.graficoTempo(lista, 'Sinal de áudio original', 'orange')
+        plt.subplot(3,1,2)
+        self.graficoTempo(pb, 'Sinal de áudio normalizado', 'purple')
+        plt.subplot(3,1,3)
+        self.graficoTempo(S, 'Sinal de áudio modulado em AM', 'green')
+        plt.savefig('modulacao-sinal-audio.png')
+
+    def graficoTempo(self, signal, title, color):
+        duration = len(signal)/self.freqAmostra
+        tempo = np.linspace(0, duration, num=len(signal))
+        plt.plot(tempo, signal, color)
+        plt.title(title)
+        plt.xlabel('Tempo (s)')
+        
+
+    def getSoundWaveList(self, sound):
+        lista=[]
+        for i in sound:
+            lista.append(i[1])
+        return lista
+
+
+    def normalize(self, lista):
+        """
+        Método que normaliza a lista de amplitudes
+        """
+        
+        maximo = max(lista)
+        minimo = min(lista)
+        module = []
+        for e in lista:
+            if (maximo > abs(minimo)):
+                module.append(e/maximo)
+            else:
+                module.append(e/abs(minimo))
+        f = fpb.PassaBaixa(module, self.freqAmostra)
+        pb = f.filtro()
+        return pb
+
+    def moduleAM(self, pb):
+        f = 14000 # freq a ser modulada em Hz
+        b = bibSignal.signalMeu()
+        Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
+        S = []
+        for m in range(len(pb)):
+            S.append(Cs[m]*pb[m])
+        return S
+
 
     def discagem(self):
         """
