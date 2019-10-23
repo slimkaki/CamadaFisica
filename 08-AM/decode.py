@@ -21,7 +21,7 @@ import peakutils, time, math, sys
 
 class Decode(object):
 
-    def __init__(self):
+    def __init__(self, rec):
         self.freqAmostra = 44100
         self.freq1 = 0
         self.freq2 = 0
@@ -29,6 +29,46 @@ class Decode(object):
         self.duration = 2 # segundos
         self.gainX  = 0.3
         self.gainY  = 0.3
+        self.duration = rec
+        self.sound = []
+
+    def main(self):
+        self.recordAudio()
+        sd.play(self.sound, self.freqAmostra) 
+        sd.wait()
+
+
+    def recordAudio(self):
+        print("\nA captura de áudio iniciará em 5 segundos")
+        t0 = time.time()
+        t1 = time.time()
+        while (t1-t0 < 5):
+            print(str(round(5-(t1-t0))) + str(" segundo(s)\r"), end='\r')
+            t1 = time.time()
+            time.sleep(1)
+        print("")
+        print("\n====================")
+        print("Começando a gravar!")
+        print("====================\n")
+        
+        myrecording = sd.rec(self.duration * self.freqAmostra, samplerate=self.freqAmostra, 
+        channels=1, blocking=True) # Possivelmente é necessário utilizar "channels=2" no ubuntu
+        sd.wait()
+
+        sound = []
+        for sublist in myrecording:
+            for item in sublist:
+                sound.append(item)
+        print("")
+        print("\n======================")
+        print("Finalizando gravação!")
+        print("======================\n")
+        self.sound = sound
+        bib = bibSignal.signalMeu()
+        xf, yf = bib.calcFFT(self.sound, self.freqAmostra)
+        plt.plot(xf, yf)
+        plt.show()
+
 
     def getSignal(self):
         """
