@@ -18,6 +18,7 @@ from scipy.fftpack import fft
 from scipy import signal as window
 import suaBibSignal as bibSignal
 import peakutils, time, math, sys
+import filtroPassaBaixa as fpb
 
 class Decode(object):
 
@@ -33,9 +34,23 @@ class Decode(object):
         self.sound = []
 
     def main(self):
+        bib = bibSignal.signalMeu()
         self.recordAudio()
+        bib.plotFFT(self.sound, self.freqAmostra, 'fourier-sinal gravado')
+        # print(self.sound)
+        # print(f'len = {len(self.sound)}')
+        self.sound = self.demoduleAM()
+
         sd.play(self.sound, self.freqAmostra) 
         sd.wait()
+        self.plotDemoduleGraph()
+        
+    def plotDemoduleGraph(self):
+        bib = bibSignal.signalMeu()
+        xf, yf = bib.calcFFT(self.sound, self.freqAmostra)
+        plt.title('Fourier - Demodule')
+        plt.plot(xf, yf)
+        plt.show()
 
 
     def recordAudio(self):
@@ -52,7 +67,7 @@ class Decode(object):
         print("====================\n")
         
         myrecording = sd.rec(self.duration * self.freqAmostra, samplerate=self.freqAmostra, 
-        channels=1, blocking=True) # Possivelmente é necessário utilizar "channels=2" no ubuntu
+        channels=2, blocking=True)[0] # Possivelmente é necessário utilizar "channels=2" no ubuntu
         sd.wait()
 
         sound = []
@@ -64,10 +79,23 @@ class Decode(object):
         print("Finalizando gravação!")
         print("======================\n")
         self.sound = sound
-        bib = bibSignal.signalMeu()
-        xf, yf = bib.calcFFT(self.sound, self.freqAmostra)
-        plt.plot(xf, yf)
-        plt.show()
+
+    def demoduleAM(self):
+        f = 14000
+        b = bibSignal.signalMeu()
+        # Cx, Cs = b.generateSin(self.freqAmostra, self.amplitude, self.duration, f)
+        Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
+
+        Cs = np.array(Cs)
+
+        S = Cs*self.sound
+        # S = []
+        # for m in range(len(self.sound)):
+        #     S.append(Cs[m]*self.sound[m])
+
+        filtroPB = fpb.PassaBaixa(S, self.freqAmostra)
+        pb = filtroPB.filtro()
+        return pb
 
 
     def getSignal(self):

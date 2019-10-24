@@ -42,6 +42,6 @@ class signalMeu(object):
         x,y = self.calcFFT(signal, fs)
         plt.figure()
         plt.plot(x, np.abs(y))
-        plt.title('Fourier')
+        plt.title(title)
         plt.savefig(title)
         # plt.show()
