@@ -36,9 +36,15 @@ class Encode(object):
     def main(self, sound):
         sound, samplerate = sf.read(sound)
         lista = self.getSoundWaveList(sound)
-        pb = self.normalize(lista)
-        S = self.moduleAM(pb)
         b = bibSignal.signalMeu()
+        # sd.play(lista, self.freqAmostra)
+        # sd.wait()
+        b.plotFFT(lista, self.freqAmostra, 'fourier-01.png')
+        pb = self.normalize(lista)
+        b.plotFFT(pb, self.freqAmostra, 'fourier-normalize.png')
+
+        S = self.moduleAM(pb)
+        # b = bibSignal.signalMeu()
         #plt.show()
 
         print("\nO áudio modulado tocará em 5 segundos")
@@ -113,6 +119,7 @@ class Encode(object):
         f = 14000 # freq a ser modulada em Hz
         b = bibSignal.signalMeu()
         Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
+        # S = Cs*pb
         S = []
         for m in range(len(pb)):
             S.append(Cs[m]*pb[m])
