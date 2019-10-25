@@ -61,7 +61,7 @@ class Encode(object):
         print("Iniciando a tocar o áudio!")
         print("========================\n")
 
-        sd.play(S, 14000)
+        sd.play(S, 44100)
         sd.wait()
 
         print("")
