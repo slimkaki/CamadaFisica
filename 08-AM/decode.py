@@ -27,7 +27,7 @@ class Decode(object):
         self.freq1 = 0
         self.freq2 = 0
         self.amplitude = 1 # amplitude da onda formada
-        self.duration = 2 # segundos
+        self.duration = 5 # segundos
         self.gainX  = 0.3
         self.gainY  = 0.3
         self.duration = rec
@@ -71,14 +71,12 @@ class Decode(object):
         print("Começando a gravar!")
         print("====================\n")
         
-        myrecording = sd.rec(self.duration * self.freqAmostra, samplerate=self.freqAmostra, 
-        channels=2, blocking=True)# Possivelmente é necessário utilizar "channels=2" no ubuntu
+        myrecording = sd.rec(self.duration * self.freqAmostra, samplerate=self.freqAmostra, channels=1)# Possivelmente é necessário utilizar "channels=2" no ubuntu
         sd.wait()
 
         sound = []
         for sublist in myrecording:
-            for item in sublist:
-                sound.append(item)
+            sound.append(sublist[0])
         print("")
         print("\n======================")
         print("Finalizando gravação!")
@@ -95,7 +93,7 @@ class Decode(object):
         """
         bib = bibSignal.signalMeu()
         sd.default.samplerate = self.freqAmostra
-        sd.default.channels = 2
+        sd.default.channels = 1
         print("\nA captura de áudio iniciará em 5 segundos")
         t0 = time.time()
         t1 = time.time()
@@ -114,8 +112,7 @@ class Decode(object):
         sd.wait()
         audio = []
         for sublist in audio1:
-            for item in sublist:
-                audio.append(item)
+            audio.append(sublist[0])
         print("")
         print("\n======================")
         print("Finalizando gravação!")
@@ -191,10 +188,9 @@ class Decode(object):
     def moduleAM(self, pb):
         f = 14000 # freq a ser modulada em Hz
         b = bibSignal.signalMeu()
-        Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
-        # S = Cs*pb
+        Cx, Cs = b.generateSin(14000,1,7,44100)
         S = []
-        for m in range(len(Cs)):
+        for m in range(len(pb)):
             S.append(Cs[m]*pb[m])
         f = fpb.PassaBaixa(S, self.freqAmostra)
         pb = f.filtro()
