@@ -184,9 +184,9 @@ class Decode(object):
                 module.append(e/maximo)
             else:
                 module.append(e/abs(minimo))
-        f = fpb.PassaBaixa(module, self.freqAmostra)
-        pb = f.filtro()
-        return pb
+        # f = fpb.PassaBaixa(module, self.freqAmostra)
+        # pb = f.filtro()
+        return module
 
     def moduleAM(self, pb):
         f = 14000 # freq a ser modulada em Hz
@@ -196,4 +196,6 @@ class Decode(object):
         S = []
         for m in range(len(Cs)):
             S.append(Cs[m]*pb[m])
-        return S
+        f = fpb.PassaBaixa(S, self.freqAmostra)
+        pb = f.filtro()
+        return pb
