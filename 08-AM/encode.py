@@ -39,11 +39,13 @@ class Encode(object):
         b = bibSignal.signalMeu()
         # sd.play(lista, self.freqAmostra)
         # sd.wait()
-        b.plotFFT(lista, self.freqAmostra, 'fourier-01.png')
+        b.plotFFT(lista, self.freqAmostra, 'encodeFourier.png')
         pb = self.normalize(lista)
-        b.plotFFT(pb, self.freqAmostra, 'fourier-normalize.png')
+        b.plotFFT(pb, self.freqAmostra, 'encodeFourier+FiltroPassaBaixa.png')
 
         S = self.moduleAM(pb)
+        b.plotFFT(S, self.freqAmostra, 'encodeFourierModulada.png')
+
         # b = bibSignal.signalMeu()
         #plt.show()
 

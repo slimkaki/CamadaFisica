@@ -36,21 +36,26 @@ class Decode(object):
     def main(self):
         bib = bibSignal.signalMeu()
         self.recordAudio()
+        plt.figure(num=None, figsize=(14, 14), dpi=80, facecolor='w', edgecolor='k')
+        self.graficoTempo(self.sound, 'Sinal de áudio capitado', 'orange')
+
         bib.plotFFT(self.sound, self.freqAmostra, 'fourier-sinal gravado')
         # print(self.sound)
         # print(f'len = {len(self.sound)}')
-        self.sound = self.demoduleAM()
+        self.sound = self.normalize(self.sound)
+        self.sound = self.moduleAM(self.sound)
 
         sd.play(self.sound, self.freqAmostra) 
         sd.wait()
-        self.plotDemoduleGraph()
+        bib.plotFFT(self.sound, self.freqAmostra, 'Demodulado e filtrado')
         
     def plotDemoduleGraph(self):
         bib = bibSignal.signalMeu()
         xf, yf = bib.calcFFT(self.sound, self.freqAmostra)
         plt.title('Fourier - Demodule')
         plt.plot(xf, yf)
-        plt.show()
+        plt.savefig('Sinal de áudio capitado.png')
+
 
 
     def recordAudio(self):
@@ -67,7 +72,7 @@ class Decode(object):
         print("====================\n")
         
         myrecording = sd.rec(self.duration * self.freqAmostra, samplerate=self.freqAmostra, 
-        channels=2, blocking=True)[0] # Possivelmente é necessário utilizar "channels=2" no ubuntu
+        channels=2, blocking=True)# Possivelmente é necessário utilizar "channels=2" no ubuntu
         sd.wait()
 
         sound = []
@@ -80,22 +85,7 @@ class Decode(object):
         print("======================\n")
         self.sound = sound
 
-    def demoduleAM(self):
-        f = 14000
-        b = bibSignal.signalMeu()
-        # Cx, Cs = b.generateSin(self.freqAmostra, self.amplitude, self.duration, f)
-        Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
 
-        Cs = np.array(Cs)
-
-        S = Cs*self.sound
-        # S = []
-        # for m in range(len(self.sound)):
-        #     S.append(Cs[m]*self.sound[m])
-
-        filtroPB = fpb.PassaBaixa(S, self.freqAmostra)
-        pb = filtroPB.filtro()
-        return pb
 
 
     def getSignal(self):
@@ -171,3 +161,39 @@ class Decode(object):
         """
         sdB = 10*np.log10(s)
         return(sdB)
+
+
+    def graficoTempo(self, signal, title, color):
+        duration = len(signal)/self.freqAmostra
+        tempo = np.linspace(0, duration, num=len(signal))
+        plt.plot(tempo, signal, color)
+        plt.title(title)
+        plt.xlabel('Tempo (s)')
+        plt.show()
+
+    def normalize(self, lista):
+        """
+        Método que normaliza a lista de amplitudes
+        """
+        
+        maximo = max(lista)
+        minimo = min(lista)
+        module = []
+        for e in lista:
+            if (maximo > abs(minimo)):
+                module.append(e/maximo)
+            else:
+                module.append(e/abs(minimo))
+        f = fpb.PassaBaixa(module, self.freqAmostra)
+        pb = f.filtro()
+        return pb
+
+    def moduleAM(self, pb):
+        f = 14000 # freq a ser modulada em Hz
+        b = bibSignal.signalMeu()
+        Cx, Cs = b.generateSin(f, self.amplitude, self.duration, self.freqAmostra)
+        # S = Cs*pb
+        S = []
+        for m in range(len(Cs)):
+            S.append(Cs[m]*pb[m])
+        return S
