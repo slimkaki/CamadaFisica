@@ -12,9 +12,7 @@
 #     Prof. Rodrigo Carareto      #
 ###################################
 
-import numpy as np
-import sounddevice as sd
-import suaBibSignal as bibSignal
+import socket
 
 from gnu import *
 
@@ -29,11 +27,7 @@ def main():
     print("\n")
 
     gnu = gnuRadio()
-    print('Digite aqui o texto a ser enviado: ')
-    text = str(input('> '))
-    gnu.writeTxt(text)
-
-
+    gnu.sendText()
 
 if __name__ == "__main__":
     main()

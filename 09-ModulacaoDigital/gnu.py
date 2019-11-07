@@ -1,38 +1,19 @@
-# import socket
-
-# class gnuRadio(object):
-#     def __init__(self):
-#         self.text = ""
-
-#     def writeTxt(self, text):
-#         f = open(str("gnuText") + str('.txt'), 'w')
-#         f.write(text)
-#         f.close()
-#         self.text = text
-
-    
 import socket
 
+class gnuRadio(object):
+    def __init__(self):
+        self.host = "127.0.0.1" # IP do host
+        self.port = 1234 # número da porta do socket
 
-def client_program():
-    host = "127.0.0.1"      # as both code is running on same pc
-    port = 1234  # socket server port number
+    def sendText(self):
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        client_socket.connect((self.host, self.port))  # conecta no servidor
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+        print('Digite aqui o texto a ser enviado: ')
+        message = input(" -> ")  # pega o primeiro texto
 
-    message = input(" -> ")  # take input
-
-    while message.lower().strip() != 'bye':
-        client_socket.send(message.encode())  # send message
-        #data = client_socket.recv(1024).decode()  # receive response
-
-        #print('Received from server: ' + data)  # show in terminal
-
-        message = input(" -> ")  # again take input
-
-    client_socket.close()  # close the connection
-
-
-if __name__ == '__main__':
-    client_program()
+        while message.lower().strip() != 'bye': # se o texto em algum momento for igual a "bye", a comunicação é terminada
+            client_socket.send(message.encode())  # envia a mensagem
+            print('Digite outro texto a ser enviado: ')
+            message = input("> ")  # pega outro texto
+        client_socket.close()  # acaba com a conexão
